@@ -1,50 +1,77 @@
-import "reflect-metadata";
+/** Environment constants **/
 import { __prod__ } from "./constants";
+import { __port__ } from "./constants";
 
-import { MikroORM, RequestContext } from "@mikro-orm/core";
-import express from "express";
-import { ApolloServer } from "apollo-server-express";
-import { buildSchema } from "type-graphql";
+/** Libraries **/ 
+import "reflect-metadata"; // to see more errors
+import { MikroORM } from "@mikro-orm/core"; // To interact with PostgreSQL database
+import MikroORMConfig from "./mikro-orm.config"; // config
+import express from "express"; // For server init
+import { ApolloServer } from "apollo-server-express"; // For GraphQL
+import { buildSchema } from "type-graphql"; // Typescript GraphQL
+import session from "express-session"; // for Redis
+import { createClient } from "redis"; // Redis
 
-import MikroORMConfig from "./mikro-orm.config";
-// import { Post } from "./entities/Post";
+/** Resolvers **/
 import { HelloResolver } from "./resolvers/HelloResolver";
 import { PostResolver } from "./resolvers/PostResolver";
+import { UserResolver } from "./resolvers/UserResolver";
+import { MyContext } from "./types";
 
 const main = async() => {
+    //Configure MikroORM
     const orm = await MikroORM.init(MikroORMConfig);
-    await orm.getMigrator().up();
+    await orm.getMigrator().up(); // make migration at the start
 
-    // run things in the `RequestContext` handler
-    await RequestContext.createAsync(orm.em, async () => {
-        // inside this handler the `orm.em` will actually use the contextual fork, created via `RequestContext.createAsync()`
-
-        // const post = orm.em.create(Post, {
-        //     title: "my first post",
-        // });
-        // await orm.em.persistAndFlush(post);
-    });
-
+    // Initialize app
     const app = express();
+    const port = __port__ || 8080;
 
-    const apolloServer = new ApolloServer({
+    // Configure Redis@v4. 
+    let RedisStore = require("connect-redis")(session)
+    let redisClient = createClient({ legacyMode: true })
+    redisClient.connect().catch(console.error)
+
+    app.use(
+        session({
+            name: "qid",
+            store: new RedisStore({ client: redisClient }),
+            saveUninitialized: false, // session creates only when it is set
+            secret: "expressjsapollographqlredismikroorm",
+            resave: false,
+            cookie: {
+                maxAge: 1000 * 60 * 60 * 24, // 1 day
+                httpOnly: true,
+                secure: __prod__, // cookie only works in https
+                sameSite: 'lax', // csrf protection
+            }
+        })
+    )  //Order matters, so redis session middleware will run before the apollo middleware. (It's important because session middleware will be used inside apollo)
+
+    // Configure ApolloGraphQL server
+    const server = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [HelloResolver, PostResolver],
+            resolvers: [HelloResolver, PostResolver, UserResolver],
             validate: false,
         }),
-        context: () => ({ em: orm.em }) // function that returns object for context
+        context: ({req, res}): MyContext => ({ em: orm.em, req, res }), //We can access the entity manager, request and response through context
     });
-    await apolloServer.start();
-    apolloServer.applyMiddleware({ app });
+    await server.start();
+    server.applyMiddleware({ 
+        app, 
+        cors: {
+            credentials: true,
+        }, 
+    });
 
-    // app.get('/', (req, res) => { // to ignore req or res use _ instead
-    //     res.send('Hello there!');
-    // }); if Apollo Graphql wasn't used in the project
-    app.listen(4444, () => {
-        console.log('Server started on localhost: 4444')
+    // app.set("trust proxy", 1); //If your server is behind a proxy (Heroku, Nginx, Now, etc...)
+
+    app.listen(port, () => {
+        console.log('Server started on localhost: 4444');
+        console.log('Press Ctrl+C to exit');
     });
 }
 
 main().catch((err) => {
     console.log(err);
-}); 
+});

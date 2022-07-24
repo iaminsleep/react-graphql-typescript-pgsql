@@ -15,12 +15,43 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostResolver = void 0;
 const Post_1 = require("../entities/Post");
 const type_graphql_1 = require("type-graphql");
+const core_1 = require("@mikro-orm/core");
 let PostResolver = class PostResolver {
     posts({ em }) {
         return em.fork().find(Post_1.Post, {});
     }
     post(id, { em }) {
         return em.fork().findOne(Post_1.Post, { id });
+    }
+    async createPost(title, { em }) {
+        return await core_1.RequestContext.createAsync(em, async () => {
+            const post = em.create(Post_1.Post, { title });
+            await em.persistAndFlush(post);
+            return post;
+        });
+    }
+    async updatePost(id, title, { em }) {
+        return await core_1.RequestContext.createAsync(em, async () => {
+            const post = await em.findOne(Post_1.Post, { id });
+            if (!post)
+                return null;
+            if (typeof title !== 'undefined') {
+                post.title = title;
+                await em.persistAndFlush(post);
+            }
+            return post;
+        });
+    }
+    async deletePost(id, { em }) {
+        return await core_1.RequestContext.createAsync(em, async () => {
+            try {
+                em.nativeDelete(Post_1.Post, { id });
+            }
+            catch (_a) {
+                return false;
+            }
+            return true;
+        });
     }
 };
 __decorate([
@@ -38,6 +69,31 @@ __decorate([
     __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "post", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Post_1.Post),
+    __param(0, (0, type_graphql_1.Arg)('title')),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], PostResolver.prototype, "createPost", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Post_1.Post),
+    __param(0, (0, type_graphql_1.Arg)('id', () => type_graphql_1.Int)),
+    __param(1, (0, type_graphql_1.Arg)('title', () => String, { nullable: true })),
+    __param(2, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, Object]),
+    __metadata("design:returntype", Promise)
+], PostResolver.prototype, "updatePost", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    __param(0, (0, type_graphql_1.Arg)('id', () => type_graphql_1.Int)),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", Promise)
+], PostResolver.prototype, "deletePost", null);
 PostResolver = __decorate([
     (0, type_graphql_1.Resolver)()
 ], PostResolver);
