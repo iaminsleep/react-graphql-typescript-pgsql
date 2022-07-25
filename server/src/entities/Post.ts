@@ -9,7 +9,7 @@ export class Post
 
   @Field(() => Int) // if @Field is set, you cannot make a query in GraphQL without specifying this field in the query object.
   @PrimaryKey()
-  id!: number;
+  id!: number; // ! means not null
 
   @Field(() => String)
   @Property({ type: 'text' })

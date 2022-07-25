@@ -81,7 +81,7 @@ let UserResolver = class UserResolver {
             if (options.password.length <= 4)
                 return {
                     errors: [{
-                            field: 'username',
+                            field: 'password',
                             message: 'Password length must be greater than 4.'
                         }]
                 };

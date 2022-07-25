@@ -27,7 +27,7 @@ const main = async() => {
     const app = express();
     const port = __port__ || 8080;
 
-    // Configure Redis@v4. 
+    // Configure Redis@v4. Cookies will be stored inside redis server since.
     let RedisStore = require("connect-redis")(session)
     let redisClient = createClient({ legacyMode: true })
     redisClient.connect().catch(console.error)
@@ -60,6 +60,10 @@ const main = async() => {
     server.applyMiddleware({ 
         app, 
         cors: {
+            origin: [
+                "http://localhost:3000",
+                "https://studio.apollographql.com",
+            ],
             credentials: true,
         }, 
     });
@@ -67,7 +71,7 @@ const main = async() => {
     // app.set("trust proxy", 1); //If your server is behind a proxy (Heroku, Nginx, Now, etc...)
 
     app.listen(port, () => {
-        console.log('Server started on localhost: 4444');
+        console.log('Server started on localhost: ', port);
         console.log('Press Ctrl+C to exit');
     });
 }

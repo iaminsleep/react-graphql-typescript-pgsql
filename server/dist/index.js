@@ -48,11 +48,15 @@ const main = async () => {
     server.applyMiddleware({
         app,
         cors: {
+            origin: [
+                "http://localhost:3000",
+                "https://studio.apollographql.com",
+            ],
             credentials: true,
         },
     });
     app.listen(port, () => {
-        console.log('Server started on localhost: 4444');
+        console.log('Server started on localhost: ', port);
         console.log('Press Ctrl+C to exit');
     });
 };
