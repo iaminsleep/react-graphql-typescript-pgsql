@@ -1,23 +1,12 @@
-import { ChakraProvider } from '@chakra-ui/react'
-import theme from '../theme'
-import { AppProps } from 'next/app'
-
-import { Provider, createClient } from 'urql'; // import graphql provider
-
-const client = createClient({
-  url: "http://localhost:8080/graphql",
-  fetchOptions: {
-    credentials: "include" // we need this to get cookies
-  }
-});
+import { ChakraProvider } from '@chakra-ui/react';
+import { AppProps } from 'next/app';
+import theme from '../theme';
 
 function MyApp({ Component, pageProps }: AppProps): any {
   return (
-    <Provider value={client}>
-      <ChakraProvider theme={theme}>
-        <Component {...pageProps} />
-      </ChakraProvider>
-    </Provider>
+    <ChakraProvider theme={theme}>
+      <Component {...pageProps} />
+    </ChakraProvider>
   )
 }
 

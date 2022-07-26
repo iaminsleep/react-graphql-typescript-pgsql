@@ -1,5 +1,3 @@
-// In Next.JS, whatever you name the file it will be the route for browser. For example, register.tsx is accessible by /register route;
-
 import * as React from 'react';
 
 import { Formik, Form } from 'formik';
@@ -7,27 +5,27 @@ import { Box, Button } from '@chakra-ui/react';
 import { Wrapper } from '../components/Wrapper';
 import { InputField } from '../components/InputField';
 
-import { useRegisterMutation } from '../generated/graphql';
+import { useLoginMutation } from '../generated/graphql';
 import { toErrorMap } from './utils/toErrorMap';
 import { useRouter } from 'next/router';
 import { withUrqlClient } from 'next-urql';
 import { createUrqlClient } from './utils/createUrqlClient';
 
-interface RegisterProps {}
+interface LoginProps {}
 
-const Register: React.FC<RegisterProps> = ({}) => {
+const Login: React.FC<LoginProps> = ({}) => {
     const router = useRouter();
-    const [, register] = useRegisterMutation();
+    const [, login] = useLoginMutation();
     return (
         <Wrapper variant="regular">
             <Formik
                 initialValues={{ username: "", password: "" }}
                 onSubmit={async (values, { setErrors }) => {
-                    const response = await register(values); // onSubmitting variable doesn't change because promise is not returned. That's why it is infinitely spinning, so adding 'return' before function name solves the issue
-                    if(response.data?.register.errors) // optional chaining allows to access deep nested properties 
+                    const response = await login(values);
+                    if(response.data?.login.errors) // optional chaining allows to access deep nested properties 
                     {
-                        setErrors(toErrorMap(response.data.register.errors));
-                    } else if(response.data?.register.user) {
+                        setErrors(toErrorMap(response.data.login.errors));
+                    } else if(response.data?.login.user) {
                         // worked
                         router.push('/');
                     }
@@ -54,7 +52,7 @@ const Register: React.FC<RegisterProps> = ({}) => {
                             isLoading={ isSubmitting }
                             color="white"
                             backgroundColor="teal"
-                        >Register
+                        >Login
                         </Button>
                     </Form>
                 )}
@@ -63,4 +61,4 @@ const Register: React.FC<RegisterProps> = ({}) => {
     );
 };
 
-export default withUrqlClient(createUrqlClient)(Register); // wrap the page into urql
+export default withUrqlClient(createUrqlClient)(Login); // server-side rendering is not enabled because data here is static

@@ -1,0 +1,6 @@
+# Fragments allow to change the every Mutation or Query structure wherever the fragment is implemented in. Basically, it works like a variable. It saves a lot of time.
+
+fragment RegularUser on User {
+    id
+    username
+}
