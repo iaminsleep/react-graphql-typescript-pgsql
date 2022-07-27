@@ -16,8 +16,10 @@ exports.PostResolver = void 0;
 const Post_1 = require("../entities/Post");
 const type_graphql_1 = require("type-graphql");
 const core_1 = require("@mikro-orm/core");
+const sleep_1 = require("../utils/sleep");
 let PostResolver = class PostResolver {
-    posts({ em }) {
+    async posts({ em }) {
+        await (0, sleep_1.sleep)(3000);
         return em.fork().find(Post_1.Post, {});
     }
     post(id, { em }) {

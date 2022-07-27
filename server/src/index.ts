@@ -1,6 +1,9 @@
 /** Environment constants **/
-import { __prod__ } from "./constants";
-import { __port__ } from "./constants";
+import { 
+    COOKIE_NAME, 
+    __prod__, 
+    __port__  
+} from "./constants";
 
 /** Libraries **/ 
 import "reflect-metadata"; // to see more errors
@@ -10,7 +13,7 @@ import express from "express"; // For server init
 import { ApolloServer } from "apollo-server-express"; // For GraphQL
 import { buildSchema } from "type-graphql"; // Typescript GraphQL
 import session from "express-session"; // for Redis
-import { createClient } from "redis"; // Redis
+import Redis from "ioredis"; // Redis
 
 /** Resolvers **/
 import { HelloResolver } from "./resolvers/HelloResolver";
@@ -21,6 +24,7 @@ import { MyContext } from "./types";
 const main = async() => {
     //Configure MikroORM
     const orm = await MikroORM.init(MikroORMConfig);
+    // orm.em.nativeDelete(User, {}); // wipe all the data
     await orm.getMigrator().up(); // make migration at the start
 
     // Initialize app
@@ -29,13 +33,13 @@ const main = async() => {
 
     // Configure Redis@v4. Cookies will be stored inside redis server since.
     let RedisStore = require("connect-redis")(session)
-    let redisClient = createClient({ legacyMode: true })
-    redisClient.connect().catch(console.error)
+    let redis = new Redis(); // connect ioredis to redis. original: import { createClient } from "redis"; let redisClient = createClient({ legacyMode: true });
+    redis.connect().catch(console.error)
 
     app.use(
         session({
-            name: "qid",
-            store: new RedisStore({ client: redisClient }),
+            name: COOKIE_NAME,
+            store: new RedisStore({ client: redis }),
             saveUninitialized: false, // session creates only when it is set
             secret: "expressjsapollographqlredismikroorm",
             resave: false,
@@ -54,7 +58,9 @@ const main = async() => {
             resolvers: [HelloResolver, PostResolver, UserResolver],
             validate: false,
         }),
-        context: ({req, res}): MyContext => ({ em: orm.em, req, res }), //We can access the entity manager, request and response through context
+        context: ({req, res }): MyContext => (
+            { em: orm.em, req, res, redis }
+        ), //We can access the entity manager, request and response through context
     });
     await server.start();
     server.applyMiddleware({ 

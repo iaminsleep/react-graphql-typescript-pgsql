@@ -2,14 +2,16 @@ import { Post } from "../entities/Post";
 import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
 import { MyContext } from "src/types";
 import { RequestContext } from "@mikro-orm/core";
+import { sleep } from "../utils/sleep";
 
 @Resolver()
 export class PostResolver {
     /** CRUD Operations Through GraphQL */
     @Query(() => [Post])
-    posts(
+    async posts(
         @Ctx() { em }: MyContext
     ): Promise<Post[]> {
+        await sleep(3000);
         return em.fork().find(Post, {}); // returns Promise of posts - completion of asynchronous operation.
     }
 
