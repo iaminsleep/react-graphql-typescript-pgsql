@@ -1,7 +1,7 @@
 import { cacheExchange } from "@urql/exchange-graphcache";
 import { dedupExchange, fetchExchange } from "urql";
-import { LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation } from "../../generated/graphql";
-import { betterUpdateQuery } from '../utils/betterUpdateQuery';
+import { LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation } from "../generated/graphql";
+import { betterUpdateQuery } from './betterUpdateQuery';
 
 /** Create URQL client */
 export const createUrqlClient = (ssrExchange: any) => ({

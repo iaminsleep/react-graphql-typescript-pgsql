@@ -8,10 +8,10 @@ import { Wrapper } from '../components/Wrapper';
 import { InputField } from '../components/InputField';
 
 import { useRegisterMutation } from '../generated/graphql';
-import { toErrorMap } from './utils/toErrorMap';
+import { toErrorMap } from '../utils/toErrorMap';
 import { useRouter } from 'next/router';
 import { withUrqlClient } from 'next-urql';
-import { createUrqlClient } from './utils/createUrqlClient';
+import { createUrqlClient } from '../utils/createUrqlClient';
 
 interface RegisterProps {}
 
@@ -21,9 +21,13 @@ const Register: React.FC<RegisterProps> = ({}) => {
     return (
         <Wrapper variant="regular">
             <Formik
-                initialValues={{ username: "", password: "" }}
+                initialValues={
+                    { email: "", username: "", password: "" }
+                }
                 onSubmit={async (values, { setErrors }) => {
-                    const response = await register(values); // onSubmitting variable doesn't change because promise is not returned. That's why it is infinitely spinning, so adding 'return' before function name solves the issue
+                    const response = await register({
+                        options: values
+                    }); // onSubmitting variable doesn't change because promise is not returned. That's why it is infinitely spinning, so adding 'return' before function name solves the issue
                     if(response.data?.register.errors) // optional chaining allows to access deep nested properties 
                     {
                         setErrors(toErrorMap(response.data.register.errors));
@@ -36,10 +40,17 @@ const Register: React.FC<RegisterProps> = ({}) => {
                 {({ isSubmitting }) => (
                     <Form>
                         <InputField
-                            name="username"
-                            placeholder="username"
-                            label="Username"
+                            name="email"
+                            placeholder="email"
+                            label="Email"
                         />
+                        <Box mt={4}>
+                        <InputField
+                                name="username"
+                                placeholder="username"
+                                label="Username"
+                        />
+                        </Box>
                         <Box mt={4}>
                         <InputField
                                 name="password"

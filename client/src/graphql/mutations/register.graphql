@@ -1,11 +1,7 @@
-mutation Register($username: String!, $password: String!) {
-    register(options: { username: $username, password: $password }) {
-        errors {
-            field
-            message
-        }
-        user {
-            ...RegularUser
-        }
+# We don't need to specify fields inside options, which is very convinient. All the options are stored inside UsernamePasswordInput
+
+mutation Register($options: UsernamePasswordInput!) {
+    register(options: $options) {
+        ...RegularUserResponse
     }
 }

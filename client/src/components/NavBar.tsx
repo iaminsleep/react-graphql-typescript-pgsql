@@ -1,12 +1,22 @@
 import { Box, Button, Flex, Link } from "@chakra-ui/react"
 import NextLink from "next/link";
+import { useEffect, useState } from "react";
 import { useMeQuery, useLogoutMutation } from "../generated/graphql";
+import { isServer } from "../utils/isServer";
 
 interface NavBarProps {}
 
 export const NavBar: React.FC<NavBarProps> = ({}) => {
+    // useEffect only runs in the browser, so just set state, which will rerender the page
+    const [isServer, setIsServer] = useState(true);
+    useEffect(() => 
+        setIsServer(false), []
+    );
+
     const [{fetching: logoutFetching}, logout] = useLogoutMutation(); // if data is fetching, logoutFetcing is set to 'true';
-    const [{data, fetching}] = useMeQuery(); // so, the logout mutation cache update in _app.tsx makes it very convinient to delete username from everywhere, because MeQuery reusult will be equal to null 
+    const [{data, fetching}] = useMeQuery({
+        pause: isServer, // if you don't want to run query on the server
+    }); // so, the logout mutation cache update in _app.tsx makes it very convinient to delete username from everywhere, because MeQuery reusult will be equal to null 
     let body = null;
 
     // There are 3 states of data fetching. We can use this to display the corresponding html. In this case the query is loading

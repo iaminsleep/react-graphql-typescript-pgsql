@@ -6,10 +6,10 @@ import { Wrapper } from '../components/Wrapper';
 import { InputField } from '../components/InputField';
 
 import { useLoginMutation } from '../generated/graphql';
-import { toErrorMap } from './utils/toErrorMap';
+import { toErrorMap } from '../utils/toErrorMap';
 import { useRouter } from 'next/router';
 import { withUrqlClient } from 'next-urql';
-import { createUrqlClient } from './utils/createUrqlClient';
+import { createUrqlClient } from '../utils/createUrqlClient';
 
 interface LoginProps {}
 
@@ -19,7 +19,7 @@ const Login: React.FC<LoginProps> = ({}) => {
     return (
         <Wrapper variant="regular">
             <Formik
-                initialValues={{ username: "", password: "" }}
+                initialValues={{ usernameOrEmail: "", password: "" }}
                 onSubmit={async (values, { setErrors }) => {
                     const response = await login(values);
                     if(response.data?.login.errors) // optional chaining allows to access deep nested properties 
@@ -34,9 +34,9 @@ const Login: React.FC<LoginProps> = ({}) => {
                 {({ isSubmitting }) => (
                     <Form>
                         <InputField
-                            name="username"
-                            placeholder="username"
-                            label="Username"
+                            name="usernameOrEmail"
+                            placeholder="username or email"
+                            label="Username or Email"
                         />
                         <Box mt={4}>
                         <InputField
