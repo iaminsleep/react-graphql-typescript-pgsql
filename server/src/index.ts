@@ -7,8 +7,6 @@ import {
 
 /** Libraries **/ 
 import "reflect-metadata"; // to see more errors
-import { MikroORM } from "@mikro-orm/core"; // To interact with PostgreSQL database
-import MikroORMConfig from "./mikro-orm.config"; // config
 import express from "express"; // For server init
 import { ApolloServer } from "apollo-server-express"; // For GraphQL
 import { buildSchema } from "type-graphql"; // Typescript GraphQL
@@ -22,11 +20,6 @@ import { UserResolver } from "./resolvers/UserResolver";
 import { MyContext } from "./types";
 
 const main = async() => {
-    //Configure MikroORM
-    const orm = await MikroORM.init(MikroORMConfig);
-    // orm.em.nativeDelete(User, {}); // wipe all the data
-    await orm.getMigrator().up(); // make migration at the start
-
     // Initialize app
     const app = express();
     const port = __port__ || 8080;
@@ -59,7 +52,7 @@ const main = async() => {
             validate: false,
         }),
         context: ({req, res }): MyContext => (
-            { em: orm.em, req, res, redis }
+            { req, res, redis }
         ), //We can access the entity manager, request and response through context
     });
     await server.start();

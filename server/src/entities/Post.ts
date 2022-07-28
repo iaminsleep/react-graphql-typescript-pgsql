@@ -1,26 +1,24 @@
-import { Entity, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
-import { ObjectType, Field, Int } from "type-graphql";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, BaseEntity } from 'typeorm';
+import { ObjectType, Field } from "type-graphql";
 
 @ObjectType() // Turn the object into GraphQL object
 @Entity()
-export class Post 
+export class Post extends BaseEntity 
 {
-  [OptionalProps]?: 'updatedAt' | 'createdAt';
-
-  @Field(() => Int) // if @Field is set, you cannot make a query in GraphQL without specifying this field in the query object.
-  @PrimaryKey()
+  @Field() // if @Field is set, you cannot make a query in GraphQL without specifying this field in the query object.
+  @PrimaryGeneratedColumn()
   id!: number; // ! means not null
 
-  @Field(() => String)
-  @Property({ type: 'text' })
+  @Field()
+  @Column()
   title!: string;
 
   @Field(() => String)
-  @Property({type: 'date'})
-  createdAt: Date = new Date();
+  @CreateDateColumn()
+  createdAt: Date;
 
   @Field(() => String)
-  @Property({ type: 'date', onUpdate: () => new Date() })
-  updatedAt: Date = new Date();
+  @UpdateDateColumn()
+  updatedAt: Date;
 
 }

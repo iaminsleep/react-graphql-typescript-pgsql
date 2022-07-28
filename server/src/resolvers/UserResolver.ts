@@ -1,4 +1,3 @@
-import { RequestContext } from "@mikro-orm/core";
 import { User } from "../entities/User";
 import { MyContext } from "src/types";
 import { Arg, Ctx, Field, Int, Mutation, ObjectType, Query, Resolver } from "type-graphql";
@@ -8,6 +7,7 @@ import { UsernamePasswordInput } from "../utils/UsernamePasswordInput";
 import { validateRegister } from "../utils/validateRegister";
 import { sendEmail } from "../utils/sendEmail";
 import { v4 } from 'uuid';
+import { AppDataSource } from "../typeorm-data-source"; // config
 
 @ObjectType() // GraphQL object
 class FieldError {
@@ -31,93 +31,92 @@ export class UserResolver {
     @Query(() => User, { nullable: true })
     user(
         @Arg('id', () => Int) id: number,
-        @Ctx() { em }: MyContext,
     ) : Promise<User | null> {
-        return em.fork().findOne(User, { id });
+        return User.findOne({where: {id: id}});
     }
 
     @Query(() => User, { nullable: true })
     async me(
-        @Ctx() { em, req }: MyContext,
-    ) : Promise<User | null> {
+        @Ctx() { req }: MyContext,
+    ): Promise<User | null> {
         // return null if you are not logged in
         if(!req.session.userId) return null;
         else {
             // else find user by id that is stored in cookie
-            const user = await em.fork().findOne(User, { id: req.session.userId });
-            return user
+            return User.findOne({where: {id: req.session.userId}});
         }
     }
 
     @Mutation(() => UserResponse)
     async register(
         @Arg('options', () => UsernamePasswordInput) options: UsernamePasswordInput, // use the options object, also you can specify what exactly you pass if you receieve an error
-        @Ctx() { em }: MyContext,
     ): Promise<UserResponse> {
-        return await RequestContext.createAsync(em, async() => {
-            const errors = validateRegister(options);
-            if(errors) {
-                return { errors }; // return error from response. change the shape of error response
-            }
+        const errors = validateRegister(options);
+        if(errors) {
+            return { errors }; // return error from response. change the shape of error response
+        }
 
-            const hashedPassword = await argon2.hash(options.password);
-            const user = em.create(User, {
+        const hashedPassword = await argon2.hash(options.password);
+        let user;
+        try {
+            const result = await AppDataSource.createQueryBuilder().insert().into(User).values({
                 email: options.email,
                 username: options.username,
                 password: hashedPassword
-            });
+            }).returning('*').execute(); // returning * clause to return user object
+            user = result.raw[0]; // the whole code here is if you want to use query builder instead of easy User.create({email: options.email,username: options.username,password: hashedPassword}) function
 
-            try {
-                await em.persistAndFlush(user); // try to execute these commands, otherwise throw errors depending on the error code
-            } catch (err) {
-                // duplicate username error
-                if(err.code === '23505') return  {
-                    errors: [{ 
-                        field: 'username', 
-                        message: 'This username has already been taken.'
-                    }]
-                }
+            // const user = em.create(User, {
+            //     email: options.email,
+            //     username: options.username,
+            //     password: hashedPassword
+            // }); TYPEORM EQUIVALENT
+        } catch (err) {
+            // duplicate username error
+            if(err.code === '23505') return  {
+                errors: [{ 
+                    field: 'username', 
+                    message: 'This username has already been taken.'
+                }]
             }
+        }
 
-            return { user }; // return user in the object
-        })
+        return { user }; // return user in the object
     }
 
     @Mutation(() => UserResponse)
     async login(
         @Arg('usernameOrEmail') usernameOrEmail: string,
         @Arg('password') password: string,
-        @Ctx() { em, req }: MyContext,
+        @Ctx() { req }: MyContext,
     ): Promise<UserResponse> {
-        return await RequestContext.createAsync(em, async() => {
-            const user = await em.findOne(User, 
-                usernameOrEmail.includes('@') 
-                ? { email: usernameOrEmail.toLowerCase() }
-                :  { username: usernameOrEmail.toLowerCase() 
-            }); // conditionally find user either by email or username
+        const user = await User.findOne(
+            usernameOrEmail.includes('@') 
+            ? { where: {email: usernameOrEmail.toLowerCase()}}
+            :  { where: {username: usernameOrEmail.toLowerCase()}}
+        ); // conditionally find user either by email or username
 
-            if(!user) return { 
-                errors: [{
-                    field: 'usernameOrEmail',
-                    message: "That username doesn't exist.",
-                }]
-            } // error if user was not found by name
+        if(!user) return { 
+            errors: [{
+                field: 'usernameOrEmail',
+                message: "That user doesn't exist.",
+            }]
+        } // error if user was not found by name
 
-            const valid = await argon2.verify(user.password, password); // verify hashed user password with plain text password from graphql argument
-            if(!valid) return {
-                errors: [{
-                    field: 'password',
-                    message: "Incorrect password.",
-                }]
-            }
+        const valid = await argon2.verify(user.password, password); // verify hashed user password with plain text password from graphql argument
+        if(!valid) return {
+            errors: [{
+                field: 'password',
+                message: "Incorrect password.",
+            }]
+        }
 
-            // if user is found and password is correct, session cookie is stored with user id to know who the authenticated user is. this will set a cookie on the user & keep them logged in until cookie is expired or deleted.
-            req.session!.userId = user.id;
+        // if user is found and password is correct, session cookie is stored with user id to know who the authenticated user is. this will set a cookie on the user & keep them logged in until cookie is expired or deleted.
+        req.session!.userId = user.id;
 
-            return {
-                user, // if user is found and password is correct, user object is returned
-            };
-        })
+        return {
+            user, // if user is found and password is correct, user object is returned
+        };
     }
 
     @Mutation(() => Boolean)
@@ -141,34 +140,34 @@ export class UserResolver {
     }
 
     @Mutation(() => Boolean)
-    forgotPassword(
+    async forgotPassword(
         @Arg('email') email: string,
-        @Ctx() { em, redis } : MyContext
+        @Ctx() { redis } : MyContext
     ) {
-        return RequestContext.createAsync(em, async() => {
-            const user = await em.findOne(User, { email });
-            if(!user) {
-                // the email is not in the db
-                return true; // the reason for this is security, because realistically you don't want for user to fetch the entire database and let him know which email exists and which is not.
-            }
+        const user = await User.findOne(
+            {where: {email: email }}
+        ); // email is not primary key, that's why we need to specify it when searching
+        if(!user) {
+            // the email is not in the db
+            return true; // the reason for this is security, because realistically you don't want for user to fetch the entire database and let him know which email exists and which is not.
+        }
 
-            // generate token
-            const token = v4(); // generate token using uuid lib
-            await redis.set(FORGET_PASSWORD_PREFIX + token, user.id, 'EX', 1000 * 60 * 60 * 24 * 2); // store the token inside redis database that will look like: 'forget-password:qeioe-rwetg423-dsd-dsf', expires after 2 days
+        // generate token
+        const token = v4(); // generate token using uuid lib
+        await redis.set(FORGET_PASSWORD_PREFIX + token, user.id, 'EX', 1000 * 60 * 60 * 24 * 2); // store the token inside redis database that will look like: 'forget-password:qeioe-rwetg423-dsd-dsf', expires after 2 days
 
-            await sendEmail(email, 
-                `<a href="http://localhost:3000/change-password/${token}">Click this link to reset your password</a>`
-            );
+        await sendEmail(email, 
+            `<a href="http://localhost:3000/change-password/${token}">Click this link to reset your password</a>`
+        );
 
-            return true; // return true anyway
-        })
+        return true; // return true anyway
     }
 
     @Mutation(() => UserResponse)
     async changePassword(
         @Arg('token') token: string,
         @Arg('newPassword') newPassword: string,
-        @Ctx() { em, req, redis }: MyContext
+        @Ctx() { req, redis }: MyContext
     ): Promise<UserResponse> {
         // password field validation
         if(newPassword.length <= 4) { 
@@ -185,15 +184,21 @@ export class UserResolver {
         }
 
         // rare occasion if user was not found in db
-        const user = await em.fork().findOne(User, { id: userId });
+        const userIdNum = parseInt(userId);
+        const user = await User.findOne(
+            {where: {id: userIdNum }}
+        );
         if(!user) {
             return { errors: [{field: "token", message: "User no longer exists"}]
             }
         }
 
         // hash the password and save in the database
-        user.password = await argon2.hash(newPassword);
-        await em.fork().persistAndFlush(user);
+        // await em.fork().persistAndFlush(user);
+        User.update(
+            {id: userIdNum}, 
+            {password: await argon2.hash(newPassword)}
+        );
 
         // remove token from redis so you can't change password again
         await redis.del(key);
