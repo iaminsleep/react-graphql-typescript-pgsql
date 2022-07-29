@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 import { Post } from './entities/Post';
 import { User } from './entities/User';
+import path from 'path';
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -10,6 +11,7 @@ export const AppDataSource = new DataSource({
     port: 5432,
     logging: true,
     synchronize: true, // synchronize: true migrates automatically at the start
+    migrations: [path.join(__dirname, './migrations/*{.ts,.js}')],
     entities: [Post, User],
 });
 
@@ -19,5 +21,6 @@ export const AppDataSource = new DataSource({
 AppDataSource.initialize()
     .then(() => {
         // here you can start to work with your database
+        // AppDataSource.runMigrations(); to run migrations in index.ts
     })
     .catch((error) => console.log(error))

@@ -16,16 +16,30 @@ exports.PostResolver = void 0;
 const Post_1 = require("../entities/Post");
 const type_graphql_1 = require("type-graphql");
 const sleep_1 = require("../utils/sleep");
+const isAuth_1 = require("../middleware/isAuth");
+const PostInput_1 = require("../utils/PostInput");
+const typeorm_data_source_1 = require("../typeorm-data-source");
 let PostResolver = class PostResolver {
-    async posts() {
+    async posts(limit, cursor) {
         await (0, sleep_1.sleep)(3000);
-        return Post_1.Post.find();
+        const realLimit = Math.min(50, limit);
+        const queryBuilder = typeorm_data_source_1.AppDataSource
+            .getRepository(Post_1.Post)
+            .createQueryBuilder("pagination")
+            .orderBy('"createdAt"', "DESC")
+            .limit(realLimit);
+        if (cursor) {
+            queryBuilder.where('"createdAt" < :cursor', {
+                cursor: new Date(parseInt(cursor)),
+            });
+        }
+        return queryBuilder.getMany();
     }
     post(id) {
         return Post_1.Post.findOne({ where: { id } });
     }
-    async createPost(title) {
-        return Post_1.Post.create({ title }).save();
+    async createPost(input, { req }) {
+        return Post_1.Post.create(Object.assign(Object.assign({}, input), { creatorId: req.session.userId })).save();
     }
     async updatePost(id, title) {
         const post = await Post_1.Post.findOne({ where: { id } });
@@ -43,8 +57,10 @@ let PostResolver = class PostResolver {
 };
 __decorate([
     (0, type_graphql_1.Query)(() => [Post_1.Post]),
+    __param(0, (0, type_graphql_1.Arg)('limit', () => type_graphql_1.Int)),
+    __param(1, (0, type_graphql_1.Arg)('cursor', () => String, { nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "posts", null);
 __decorate([
@@ -56,13 +72,16 @@ __decorate([
 ], PostResolver.prototype, "post", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Post_1.Post),
-    __param(0, (0, type_graphql_1.Arg)('title')),
+    (0, type_graphql_1.UseMiddleware)(isAuth_1.isAuth),
+    __param(0, (0, type_graphql_1.Arg)('input')),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [PostInput_1.PostInput, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "createPost", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Post_1.Post),
+    (0, type_graphql_1.UseMiddleware)(isAuth_1.isAuth),
     __param(0, (0, type_graphql_1.Arg)('id', () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Arg)('title', () => String, { nullable: true })),
     __metadata("design:type", Function),
@@ -71,6 +90,7 @@ __decorate([
 ], PostResolver.prototype, "updatePost", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
+    (0, type_graphql_1.UseMiddleware)(isAuth_1.isAuth),
     __param(0, (0, type_graphql_1.Arg)('id', () => type_graphql_1.Int)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),

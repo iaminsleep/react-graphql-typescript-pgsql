@@ -10,7 +10,8 @@
     "dev2": "nodemon --exec ts-node src/index.ts",
     "watch": "tsc -w",
     "migration:create": "typeorm migration:create ./src/migrations/PostgreSQL",
-    "migration:run": "typeorm migration:run"
+    "migration:generate": "typeorm migration:generate -d src/typeorm-data-source.ts",
+    "migration:run": "typeorm migration:run -d dist/typeorm-data-source.js"
   },
   "keywords": [],
   "author": "",

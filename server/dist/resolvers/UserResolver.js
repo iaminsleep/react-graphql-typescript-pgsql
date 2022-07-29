@@ -82,7 +82,7 @@ let UserResolver = class UserResolver {
                 return {
                     errors: [{
                             field: 'username',
-                            message: 'This username has already been taken.'
+                            message: 'This username or email has already been taken.'
                         }]
                 };
         }

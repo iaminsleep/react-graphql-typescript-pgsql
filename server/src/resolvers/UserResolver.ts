@@ -76,7 +76,7 @@ export class UserResolver {
             if(err.code === '23505') return  {
                 errors: [{ 
                     field: 'username', 
-                    message: 'This username has already been taken.'
+                    message: 'This username or email has already been taken.'
                 }]
             }
         }

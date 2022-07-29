@@ -1,14 +1,15 @@
-import { NavBar } from "../components/NavBar"
 import { withUrqlClient } from 'next-urql';
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { useGetPostsQuery } from "../generated/graphql";
 import { Box } from "@chakra-ui/react";
+import { Layout } from "../components/Layout";
 
 const Index = () => {
-  const [{data}] = useGetPostsQuery();
+  const [{data}] = useGetPostsQuery({
+    variables: { limit: 10 }
+  });
   return (
-    <>
-      <NavBar/>
+    <Layout>
       {/* if data is true, the posts are going to show. */}
       {!data ? (
         <div>Loading...</div>
@@ -17,7 +18,7 @@ const Index = () => {
         )
       }
       <Box>Hello World</Box>
-    </>
+    </Layout>
   )
 }
 

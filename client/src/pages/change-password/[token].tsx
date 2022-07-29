@@ -1,4 +1,4 @@
-// this way of naming files is the tsx solution for variable in url. in the brackets [token] token is the name of variable
+// this way of naming files is the tsx solution for variable in url. in the brackets [token] token is the name of variable. If you noticed, in the browser search /token=token is not dipslayed, instead it's just /token. The only reason it works is becuase we told Next.JS the token name - [token]
 
 import { Box, Button } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
@@ -12,7 +12,7 @@ import { useChangePasswordMutation } from '../../generated/graphql';
 import { createUrqlClient } from "../../utils/createUrqlClient";
 import { toErrorMap } from "../../utils/toErrorMap";
 
-export const ChangePassword: NextPage<{token: string}> = ({token}) => {
+export const ChangePassword: NextPage<{token: string}> = () => {
     const router = useRouter();
     const [, changePassword] = useChangePasswordMutation();
     const [tokenError, setTokenError] = useState('');
@@ -22,7 +22,7 @@ export const ChangePassword: NextPage<{token: string}> = ({token}) => {
             <Formik
                 initialValues={{ newPassword: '' }}
                 onSubmit={async (values, { setErrors }) => {
-                    const response = await changePassword({token, newPassword: values.newPassword });
+                    const response = await changePassword({token: typeof router.query.token === 'string' ? router.query.token : '', newPassword: values.newPassword });
                     if(response.data?.changePassword.errors) // optional chaining allows to access deep nested properties 
                     {
                         const errorMap = toErrorMap(response.data.changePassword.errors);
@@ -62,10 +62,10 @@ export const ChangePassword: NextPage<{token: string}> = ({token}) => {
     );
 }
 
-ChangePassword.getInitialProps = ({query}) => { // get any query parameters and pass to original function
-    return {
-        token: query.token as string // cast token as string
-    }
-}
+// ChangePassword.getInitialProps = ({query}) => { // get any query parameters and pass to original function
+//     return {
+//         token: query.token as string // cast token as string
+//     } another way instead of using 'router.query.token'
+// }
 
 export default withUrqlClient(createUrqlClient)(ChangePassword);

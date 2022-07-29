@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Link } from "@chakra-ui/react"
+import { Box, Button, Flex, Link, Spacer } from "@chakra-ui/react"
 import NextLink from "next/link";
 import { useEffect, useState } from "react";
 import { useMeQuery, useLogoutMutation } from "../generated/graphql";
@@ -40,7 +40,13 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
     // user is logged in
     else {
         body = ( 
-            <Flex>
+            <Flex minWidth='max-content' alignItems='center' gap='2'>
+                <Box mr={2}>  
+                    <NextLink href="/create-post">
+                        <Link color="white">Create Post</Link>
+                    </NextLink>
+                </Box>
+                <Spacer/>
                 <Box mr={2}>{ data.me.username }</Box>
                 <Button 
                     onClick={() => logout()} 
@@ -51,7 +57,7 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
         )
     }
     return(
-        <Flex bg='tan' p={4}>
+        <Flex zIndex={1} position="sticky" top={0} bg='tan' p={4}>
             <Box ml={'auto'}>
                 { body }
             </Box>
