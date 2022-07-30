@@ -1,34 +1,56 @@
 import { Post } from "../entities/Post";
-import { Arg, Ctx, Int, Mutation, Query, Resolver, UseMiddleware } from "type-graphql";
+import { Arg, Ctx, Field, FieldResolver, Int, Mutation, ObjectType, Query, Resolver, Root, UseMiddleware } from "type-graphql";
 import { sleep } from "../utils/sleep";
 import { MyContext } from "../types";
 import { isAuth } from "../middleware/isAuth";
 import { PostInput } from "../utils/PostInput";
 import { AppDataSource } from "../typeorm-data-source";
 
-@Resolver()
+@ObjectType()
+class PaginatedPosts {
+    @Field(() => [Post]) // specify what does the field return
+    posts: Post[] // return an array of posts
+    @Field()
+    hasMore: boolean; // helps define if there are any posts left
+}
+
+// speicfy what we are resolving 
+@Resolver(Post)
 export class PostResolver {
+    @FieldResolver(() => String)
+    textSnippet(@Root() root: Post) {
+        return root.text.slice(0, 50);
+    }
+
     /** CRUD Operations Through GraphQL */
-    @Query(() => [Post])
+    @Query(() => PaginatedPosts)
     async posts(
         @Arg('limit', () => Int) limit: number, // limit of posts
         @Arg('cursor', () => String, { nullable: true}) cursor: string | null
-    ): Promise<Post[]> {
+    ): Promise<PaginatedPosts> {
         await sleep(3000);
-        // return Post.find(); // returns Promise of all posts - completion of asynchronous operation.
+        // return Post.find(); // returns Promise of ALL posts - completion of asynchronous operation.
 
+        // 100 -> 101 make the query take 1 more post than usual to check if there are posts left
         const realLimit = Math.min(50, limit); // if some users wanted to change the query, this line of code won't allow this
+        const limitPaginationNumber = realLimit + 1;
         const queryBuilder = AppDataSource
             .getRepository(Post)
             .createQueryBuilder("pagination")
             .orderBy('"createdAt"', "DESC") // specific for typeorm and postgresql - wrap single quotes around double quotes if you want to use camelCase, otherwise "createdAt" will look like 'createdat'
-            .limit(realLimit)
+            .take(limitPaginationNumber)
+
         if(cursor) {
             queryBuilder.where('"createdAt" < :cursor', { 
                 cursor: new Date(parseInt(cursor)),
             }); // query builder allows using if statements and continue querying
         }
-        return queryBuilder.getMany();
+
+        const posts = await queryBuilder.getMany();
+        return { 
+            posts: posts.slice(0, realLimit),
+            hasMore: posts.length === limitPaginationNumber,
+        };
     }
 
     @Query(() => Post, { nullable: true }) // query can be null

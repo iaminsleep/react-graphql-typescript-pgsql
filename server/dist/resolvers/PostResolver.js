@@ -19,21 +19,42 @@ const sleep_1 = require("../utils/sleep");
 const isAuth_1 = require("../middleware/isAuth");
 const PostInput_1 = require("../utils/PostInput");
 const typeorm_data_source_1 = require("../typeorm-data-source");
+let PaginatedPosts = class PaginatedPosts {
+};
+__decorate([
+    (0, type_graphql_1.Field)(() => [Post_1.Post]),
+    __metadata("design:type", Array)
+], PaginatedPosts.prototype, "posts", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(),
+    __metadata("design:type", Boolean)
+], PaginatedPosts.prototype, "hasMore", void 0);
+PaginatedPosts = __decorate([
+    (0, type_graphql_1.ObjectType)()
+], PaginatedPosts);
 let PostResolver = class PostResolver {
+    textSnippet(root) {
+        return root.text.slice(0, 50);
+    }
     async posts(limit, cursor) {
         await (0, sleep_1.sleep)(3000);
         const realLimit = Math.min(50, limit);
+        const limitPaginationNumber = realLimit + 1;
         const queryBuilder = typeorm_data_source_1.AppDataSource
             .getRepository(Post_1.Post)
             .createQueryBuilder("pagination")
             .orderBy('"createdAt"', "DESC")
-            .limit(realLimit);
+            .take(limitPaginationNumber);
         if (cursor) {
             queryBuilder.where('"createdAt" < :cursor', {
                 cursor: new Date(parseInt(cursor)),
             });
         }
-        return queryBuilder.getMany();
+        const posts = await queryBuilder.getMany();
+        return {
+            posts: posts.slice(0, realLimit),
+            hasMore: posts.length === limitPaginationNumber,
+        };
     }
     post(id) {
         return Post_1.Post.findOne({ where: { id } });
@@ -56,7 +77,14 @@ let PostResolver = class PostResolver {
     }
 };
 __decorate([
-    (0, type_graphql_1.Query)(() => [Post_1.Post]),
+    (0, type_graphql_1.FieldResolver)(() => String),
+    __param(0, (0, type_graphql_1.Root)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Post_1.Post]),
+    __metadata("design:returntype", void 0)
+], PostResolver.prototype, "textSnippet", null);
+__decorate([
+    (0, type_graphql_1.Query)(() => PaginatedPosts),
     __param(0, (0, type_graphql_1.Arg)('limit', () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Arg)('cursor', () => String, { nullable: true })),
     __metadata("design:type", Function),
@@ -97,7 +125,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "deletePost", null);
 PostResolver = __decorate([
-    (0, type_graphql_1.Resolver)()
+    (0, type_graphql_1.Resolver)(Post_1.Post)
 ], PostResolver);
 exports.PostResolver = PostResolver;
 //# sourceMappingURL=PostResolver.js.map

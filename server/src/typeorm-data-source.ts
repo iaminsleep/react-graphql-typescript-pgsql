@@ -21,6 +21,8 @@ export const AppDataSource = new DataSource({
 AppDataSource.initialize()
     .then(() => {
         // here you can start to work with your database
-        // AppDataSource.runMigrations(); to run migrations in index.ts
+        // AppDataSource.runMigrations(); //to run migrations in index.ts
+        // User.delete({});
+        // Post.delete({});
     })
     .catch((error) => console.log(error))
