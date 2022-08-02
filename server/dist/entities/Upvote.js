@@ -9,60 +9,46 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Post = void 0;
+exports.Upvote = void 0;
 const typeorm_1 = require("typeorm");
 const type_graphql_1 = require("type-graphql");
 const User_1 = require("./User");
-const Upvote_1 = require("./Upvote");
-let Post = class Post extends typeorm_1.BaseEntity {
+const Post_1 = require("./Post");
+let Upvote = class Upvote extends typeorm_1.BaseEntity {
 };
 __decorate([
     (0, type_graphql_1.Field)(),
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Post.prototype, "id", void 0);
+], Upvote.prototype, "id", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], Post.prototype, "title", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(),
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], Post.prototype, "text", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(),
-    (0, typeorm_1.Column)({ type: "int", default: 0 }),
+    (0, typeorm_1.Column)({ type: "int" }),
     __metadata("design:type", Number)
-], Post.prototype, "points", void 0);
+], Upvote.prototype, "value", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.PrimaryColumn)(),
     __metadata("design:type", Number)
-], Post.prototype, "creatorId", void 0);
+], Upvote.prototype, "userId", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(),
-    (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.posts),
+    (0, type_graphql_1.Field)(() => User_1.User),
+    (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.upvotes),
     __metadata("design:type", User_1.User)
-], Post.prototype, "creator", void 0);
+], Upvote.prototype, "user", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => Upvote_1.Upvote, (upvote) => upvote.post),
-    __metadata("design:type", Array)
-], Post.prototype, "upvotes", void 0);
+    (0, type_graphql_1.Field)(),
+    (0, typeorm_1.PrimaryColumn)(),
+    __metadata("design:type", Number)
+], Upvote.prototype, "postId", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(() => String),
-    (0, typeorm_1.CreateDateColumn)(),
-    __metadata("design:type", Date)
-], Post.prototype, "createdAt", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(() => String),
-    (0, typeorm_1.UpdateDateColumn)(),
-    __metadata("design:type", Date)
-], Post.prototype, "updatedAt", void 0);
-Post = __decorate([
+    (0, type_graphql_1.Field)(() => Post_1.Post),
+    (0, typeorm_1.ManyToOne)(() => Post_1.Post, (post) => post.upvotes),
+    __metadata("design:type", Post_1.Post)
+], Upvote.prototype, "post", void 0);
+Upvote = __decorate([
     (0, type_graphql_1.ObjectType)(),
     (0, typeorm_1.Entity)()
-], Post);
-exports.Post = Post;
-//# sourceMappingURL=Post.js.map
+], Upvote);
+exports.Upvote = Upvote;
+//# sourceMappingURL=Upvote.js.map

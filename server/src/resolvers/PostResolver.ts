@@ -34,19 +34,45 @@ export class PostResolver {
         // 100 -> 101 make the query take 1 more post than usual to check if there are posts left
         const realLimit = Math.min(50, limit); // if some users wanted to change the query, this line of code won't allow this
         const limitPaginationNumber = realLimit + 1;
-        const queryBuilder = AppDataSource
-            .getRepository(Post)
-            .createQueryBuilder("pagination")
-            .orderBy('"createdAt"', "DESC") // specific for typeorm and postgresql - wrap single quotes around double quotes if you want to use camelCase, otherwise "createdAt" will look like 'createdat'
-            .take(limitPaginationNumber)
+
+        const replacements: any[] = [limitPaginationNumber];
 
         if(cursor) {
-            queryBuilder.where('"createdAt" < :cursor', { 
-                cursor: new Date(parseInt(cursor)),
-            }); // query builder allows using if statements and continue querying
+            replacements.push(new Date(parseInt(cursor)))
         }
 
-        const posts = await queryBuilder.getMany();
+        const posts = await AppDataSource.query(`
+            select p.*, json_build_object(
+                'id', u.id,
+                'username', u.username,
+                'email', u.email
+            ) creator 
+            from post p
+            inner join public.user u on u.id = p."creatorId"
+            ${cursor ? `where p."createdAt" < $2` : ''}
+            order by p."createdAt" DESC
+            limit $1
+        `, replacements); // $1 means it will be first replacement
+
+        /** queryBuilder analogue */
+        // const queryBuilder = AppDataSource
+        //     .getRepository(Post)
+        //     .createQueryBuilder("pagination")
+        //     .innerJoinAndSelect(
+        //         "post.creator",
+        //         "user", 'user.id = post."creatorId"',
+        //     )
+        //     .orderBy('post."createdAt"', "DESC") // specific for typeorm and postgresql - wrap single quotes around double quotes if you want to use camelCase, otherwise "createdAt" will look like 'createdat'
+        //     .take(limitPaginationNumber)
+
+        // if(cursor) {
+        //     queryBuilder.where('post."createdAt" < :cursor', { 
+        //         cursor: new Date(parseInt(cursor)),
+        //     }); // query builder allows using if statements and continue querying
+        // }
+
+        // const posts = await queryBuilder.getMany();
+
         return { 
             posts: posts.slice(0, realLimit),
             hasMore: posts.length === limitPaginationNumber,

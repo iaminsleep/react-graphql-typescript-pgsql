@@ -2,6 +2,7 @@ import { DataSource } from 'typeorm';
 import { Post } from './entities/Post';
 import { User } from './entities/User';
 import path from 'path';
+import { Upvote } from './entities/Upvote';
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -12,7 +13,7 @@ export const AppDataSource = new DataSource({
     logging: true,
     synchronize: true, // synchronize: true migrates automatically at the start
     migrations: [path.join(__dirname, './migrations/*{.ts,.js}')],
-    entities: [Post, User],
+    entities: [Post, User, Upvote],
 });
 
 // to initialize initial connection with the database, register all entities

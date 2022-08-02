@@ -40,17 +40,22 @@ let PostResolver = class PostResolver {
         await (0, sleep_1.sleep)(3000);
         const realLimit = Math.min(50, limit);
         const limitPaginationNumber = realLimit + 1;
-        const queryBuilder = typeorm_data_source_1.AppDataSource
-            .getRepository(Post_1.Post)
-            .createQueryBuilder("pagination")
-            .orderBy('"createdAt"', "DESC")
-            .take(limitPaginationNumber);
+        const replacements = [limitPaginationNumber];
         if (cursor) {
-            queryBuilder.where('"createdAt" < :cursor', {
-                cursor: new Date(parseInt(cursor)),
-            });
+            replacements.push(new Date(parseInt(cursor)));
         }
-        const posts = await queryBuilder.getMany();
+        const posts = await typeorm_data_source_1.AppDataSource.query(`
+            select p.*, json_build_object(
+                'id', u.id,
+                'username', u.username,
+                'email', u.email
+            ) creator 
+            from post p
+            inner join public.user u on u.id = p."creatorId"
+            ${cursor ? `where p."createdAt" < $2` : ''}
+            order by p."createdAt" DESC
+            limit $1
+        `, replacements);
         return {
             posts: posts.slice(0, realLimit),
             hasMore: posts.length === limitPaginationNumber,

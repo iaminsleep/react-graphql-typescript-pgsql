@@ -5,8 +5,11 @@ query GetPosts($limit: Int!, $cursor: String) {
             title
             createdAt
             updatedAt
-            creatorId
             textSnippet
+            creator {
+                id
+                username
+            }
         }
         hasMore
     }

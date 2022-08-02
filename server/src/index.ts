@@ -14,10 +14,10 @@ import session from "express-session"; // for Redis
 import Redis from "ioredis"; // Redis
 
 /** Resolvers **/
-import { HelloResolver } from "./resolvers/HelloResolver";
 import { PostResolver } from "./resolvers/PostResolver";
 import { UserResolver } from "./resolvers/UserResolver";
 import { MyContext } from "./types";
+import { UpvoteResolver } from "./resolvers/UpvoteResolver";
 
 const main = async() => {
     // Initialize app
@@ -48,7 +48,11 @@ const main = async() => {
     // Configure ApolloGraphQL server
     const server = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [HelloResolver, PostResolver, UserResolver],
+            resolvers: [
+                PostResolver, 
+                UserResolver, 
+                UpvoteResolver
+            ],
             validate: false,
         }),
         context: ({req, res }): MyContext => (

@@ -10,9 +10,9 @@ const apollo_server_express_1 = require("apollo-server-express");
 const type_graphql_1 = require("type-graphql");
 const express_session_1 = __importDefault(require("express-session"));
 const ioredis_1 = __importDefault(require("ioredis"));
-const HelloResolver_1 = require("./resolvers/HelloResolver");
 const PostResolver_1 = require("./resolvers/PostResolver");
 const UserResolver_1 = require("./resolvers/UserResolver");
+const UpvoteResolver_1 = require("./resolvers/UpvoteResolver");
 const main = async () => {
     const app = (0, express_1.default)();
     const port = constants_1.__port__ || 8080;
@@ -34,7 +34,11 @@ const main = async () => {
     }));
     const server = new apollo_server_express_1.ApolloServer({
         schema: await (0, type_graphql_1.buildSchema)({
-            resolvers: [HelloResolver_1.HelloResolver, PostResolver_1.PostResolver, UserResolver_1.UserResolver],
+            resolvers: [
+                PostResolver_1.PostResolver,
+                UserResolver_1.UserResolver,
+                UpvoteResolver_1.UpvoteResolver
+            ],
             validate: false,
         }),
         context: ({ req, res }) => ({ req, res, redis }),
