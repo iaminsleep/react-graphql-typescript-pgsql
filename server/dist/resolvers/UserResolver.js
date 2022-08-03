@@ -51,13 +51,7 @@ __decorate([
 UserResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], UserResponse);
-let UserResolver = class UserResolver {
-    email(user, { req }) {
-        if (req.session.userId === user.id) {
-            return user.email;
-        }
-        return "";
-    }
+class UserResolver {
     user(id) {
         return User_1.User.findOne({ where: { id: id } });
     }
@@ -96,8 +90,8 @@ let UserResolver = class UserResolver {
     }
     async login(usernameOrEmail, password, { req }) {
         const user = await User_1.User.findOne(usernameOrEmail.includes('@')
-            ? { where: { email: usernameOrEmail.toLowerCase() } }
-            : { where: { username: usernameOrEmail.toLowerCase() } });
+            ? { where: { email: usernameOrEmail } }
+            : { where: { username: usernameOrEmail } });
         if (!user)
             return {
                 errors: [{
@@ -114,9 +108,7 @@ let UserResolver = class UserResolver {
                     }]
             };
         req.session.userId = user.id;
-        return {
-            user,
-        };
+        return { user };
     }
     async logout({ req, res }) {
         return new Promise((resolve) => req.session.destroy((err) => {
@@ -160,15 +152,7 @@ let UserResolver = class UserResolver {
         req.session.userId = user.id;
         return { user };
     }
-};
-__decorate([
-    (0, type_graphql_1.FieldResolver)(() => String),
-    __param(0, (0, type_graphql_1.Root)()),
-    __param(1, (0, type_graphql_1.Ctx)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [User_1.User, Object]),
-    __metadata("design:returntype", void 0)
-], UserResolver.prototype, "email", null);
+}
 __decorate([
     (0, type_graphql_1.Query)(() => User_1.User, { nullable: true }),
     __param(0, (0, type_graphql_1.Arg)('id', () => type_graphql_1.Int)),
@@ -223,8 +207,5 @@ __decorate([
     __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "changePassword", null);
-UserResolver = __decorate([
-    (0, type_graphql_1.Resolver)(User_1.User)
-], UserResolver);
 exports.UserResolver = UserResolver;
 //# sourceMappingURL=UserResolver.js.map

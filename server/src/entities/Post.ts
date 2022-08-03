@@ -3,7 +3,7 @@ import {
   Entity, PrimaryGeneratedColumn, 
   UpdateDateColumn, BaseEntity, 
   ManyToOne, OneToMany } from 'typeorm';
-import { ObjectType, Field } from "type-graphql";
+import { ObjectType, Field, Int } from "type-graphql";
 import { User } from './User';
 import { Upvote } from './Upvote';
 
@@ -26,6 +26,9 @@ export class Post extends BaseEntity
   @Field()
   @Column({ type: "int", default: 0 }) // every post starts at 0 upvotes
   points!: number;
+
+  @Field(() => Int, { nullable: true }) // this is only a graphql schema value, there is no column in db
+  voteStatus: number | null;
 
   @Field()
   @Column()

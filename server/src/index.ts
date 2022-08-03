@@ -34,7 +34,7 @@ const main = async() => {
             name: COOKIE_NAME,
             store: new RedisStore({ client: redis }),
             saveUninitialized: false, // session creates only when it is set
-            secret: "expressjsapollographqlredismikroorm",
+            secret: "expressjsapollographqlredistypeorm",
             resave: false,
             cookie: {
                 maxAge: 1000 * 60 * 60 * 24, // 1 day
@@ -48,11 +48,7 @@ const main = async() => {
     // Configure ApolloGraphQL server
     const server = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [
-                PostResolver, 
-                UserResolver, 
-                UpvoteResolver
-            ],
+            resolvers: [PostResolver, UserResolver, UpvoteResolver],
             validate: false,
         }),
         context: ({req, res }): MyContext => (

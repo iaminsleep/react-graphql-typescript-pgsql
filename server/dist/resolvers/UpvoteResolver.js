@@ -16,23 +16,40 @@ exports.UpvoteResolver = void 0;
 const isAuth_1 = require("../middleware/isAuth");
 const typeorm_data_source_1 = require("../typeorm-data-source");
 const type_graphql_1 = require("type-graphql");
+const Upvote_1 = require("../entities/Upvote");
 class UpvoteResolver {
     async vote(postId, value, { req }) {
         const isUpvote = value !== -1;
         const realValue = isUpvote ? 1 : -1;
         const { userId } = req.session;
-        typeorm_data_source_1.AppDataSource.query(`
-            START TRANSACTION;
-
-            insert into upvote ("userId", "postId", value)
-            values ${userId}, ${postId}, ${realValue});
-
-            update post 
-            set points = points + ${realValue}
-            where id = ${postId};
-
-            COMMIT;
-        `);
+        const upvote = await Upvote_1.Upvote.findOne({ where: { postId, userId } });
+        if (upvote && upvote.value !== realValue) {
+            await typeorm_data_source_1.AppDataSource.transaction(async (transactionManager) => {
+                await transactionManager.query(`
+                    update upvote
+                    set value = $1
+                    where "postId" = $2 and "userId" = $3;
+                `, [realValue, postId, userId]);
+                await transactionManager.query(`
+                    update post 
+                    set points = points + $1
+                    where id = $2;
+                `, [realValue, postId]);
+            });
+        }
+        else if (!upvote) {
+            await typeorm_data_source_1.AppDataSource.transaction(async (transactionManager) => {
+                await transactionManager.query(`
+                    insert into upvote ("userId", "postId", value)
+                    values ($1, $2, $3);
+                `, [userId, postId, realValue]);
+                await transactionManager.query(`
+                    update post 
+                    set points = points + $1
+                    where id = $2;
+                `, [realValue, postId]);
+            });
+        }
         return true;
     }
 }

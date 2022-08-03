@@ -23,7 +23,7 @@ const main = async () => {
         name: constants_1.COOKIE_NAME,
         store: new RedisStore({ client: redis }),
         saveUninitialized: false,
-        secret: "expressjsapollographqlredismikroorm",
+        secret: "expressjsapollographqlredistypeorm",
         resave: false,
         cookie: {
             maxAge: 1000 * 60 * 60 * 24,
@@ -34,11 +34,7 @@ const main = async () => {
     }));
     const server = new apollo_server_express_1.ApolloServer({
         schema: await (0, type_graphql_1.buildSchema)({
-            resolvers: [
-                PostResolver_1.PostResolver,
-                UserResolver_1.UserResolver,
-                UpvoteResolver_1.UpvoteResolver
-            ],
+            resolvers: [PostResolver_1.PostResolver, UserResolver_1.UserResolver, UpvoteResolver_1.UpvoteResolver],
             validate: false,
         }),
         context: ({ req, res }) => ({ req, res, redis }),

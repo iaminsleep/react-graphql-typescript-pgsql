@@ -26,7 +26,8 @@ export class PostResolver {
     @Query(() => PaginatedPosts)
     async posts(
         @Arg('limit', () => Int) limit: number, // limit of posts
-        @Arg('cursor', () => String, { nullable: true}) cursor: string | null
+        @Arg('cursor', () => String, { nullable: true}) cursor: string | null,
+        @Ctx() { req }: MyContext
     ): Promise<PaginatedPosts> {
         await sleep(3000);
         // return Post.find(); // returns Promise of ALL posts - completion of asynchronous operation.
@@ -36,9 +37,15 @@ export class PostResolver {
         const limitPaginationNumber = realLimit + 1;
 
         const replacements: any[] = [limitPaginationNumber];
+ 
+        if(req.session.userId) {
+            replacements.push(req.session.userId);
+        }
 
+        let cursorIndex = 3;
         if(cursor) {
-            replacements.push(new Date(parseInt(cursor)))
+            replacements.push(new Date(parseInt(cursor)));
+            cursorIndex = replacements.length;
         }
 
         const posts = await AppDataSource.query(`
@@ -46,13 +53,18 @@ export class PostResolver {
                 'id', u.id,
                 'username', u.username,
                 'email', u.email
-            ) creator 
+            ) creator, 
+            ${
+                req.session.userId 
+                    ? '(select value from upvote where "userId" = $2 and "postId" = p.id) "voteStatus"' 
+                    : 'null as "voteStatus"'
+            }
             from post p
             inner join public.user u on u.id = p."creatorId"
-            ${cursor ? `where p."createdAt" < $2` : ''}
+            ${cursor ? `where p."createdAt" < $${cursorIndex}` : ''}
             order by p."createdAt" DESC
             limit $1
-        `, replacements); // $1 means it will be first replacement
+        `, replacements); // $1 means it will be first replacement. vote status changes only if user is authorized
 
         /** queryBuilder analogue */
         // const queryBuilder = AppDataSource

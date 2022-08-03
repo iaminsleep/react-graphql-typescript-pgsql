@@ -23,6 +23,7 @@ const Login: React.FC<LoginProps> = ({}) => {
                 initialValues={{ usernameOrEmail: "", password: "" }}
                 onSubmit={async (values, { setErrors }) => {
                     const response = await login(values);
+                    console.log(response);
                     if(response.data?.login.errors) // optional chaining allows to access deep nested properties 
                     {
                         setErrors(toErrorMap(response.data.login.errors));
@@ -45,10 +46,11 @@ const Login: React.FC<LoginProps> = ({}) => {
                         />
                         <Box mt={4}>
                         <InputField
-                                name="password"
-                                placeholder="password"
-                                label="Password"
-                                type="password"
+                            name="password"
+                            placeholder="password"
+                            label="Password"
+                            type="password"
+                            autoComplete="off"
                         />
                         </Box>
                         <Flex> 

@@ -36,23 +36,31 @@ let PostResolver = class PostResolver {
     textSnippet(root) {
         return root.text.slice(0, 50);
     }
-    async posts(limit, cursor) {
+    async posts(limit, cursor, { req }) {
         await (0, sleep_1.sleep)(3000);
         const realLimit = Math.min(50, limit);
         const limitPaginationNumber = realLimit + 1;
         const replacements = [limitPaginationNumber];
+        if (req.session.userId) {
+            replacements.push(req.session.userId);
+        }
+        let cursorIndex = 3;
         if (cursor) {
             replacements.push(new Date(parseInt(cursor)));
+            cursorIndex = replacements.length;
         }
         const posts = await typeorm_data_source_1.AppDataSource.query(`
             select p.*, json_build_object(
                 'id', u.id,
                 'username', u.username,
                 'email', u.email
-            ) creator 
+            ) creator, 
+            ${req.session.userId
+            ? '(select value from upvote where "userId" = $2 and "postId" = p.id) "voteStatus"'
+            : 'null as "voteStatus"'}
             from post p
             inner join public.user u on u.id = p."creatorId"
-            ${cursor ? `where p."createdAt" < $2` : ''}
+            ${cursor ? `where p."createdAt" < $${cursorIndex}` : ''}
             order by p."createdAt" DESC
             limit $1
         `, replacements);
@@ -92,8 +100,9 @@ __decorate([
     (0, type_graphql_1.Query)(() => PaginatedPosts),
     __param(0, (0, type_graphql_1.Arg)('limit', () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Arg)('cursor', () => String, { nullable: true })),
+    __param(2, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, Object, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "posts", null);
 __decorate([

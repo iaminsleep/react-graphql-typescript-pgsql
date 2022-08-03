@@ -3,3 +3,8 @@ me -> browse http://localhost:3000
 -> request graphql server localhost:8080
 -> building the HTML
 -> sending back to your browser
+
+ssr 
+    browser -> next.js -> graphql api
+client side
+    browser -> graphql api

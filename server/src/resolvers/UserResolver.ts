@@ -1,6 +1,6 @@
 import { User } from "../entities/User";
 import { MyContext } from "src/types";
-import { Arg, Ctx, Field, FieldResolver, Int, Mutation, ObjectType, Query, Resolver, Root } from "type-graphql";
+import { Arg, Ctx, Field, Int, Mutation, ObjectType, Query } from "type-graphql";
 import argon2 from "argon2";
 import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from "../constants";
 import { UsernamePasswordInput } from "../utils/UsernamePasswordInput";
@@ -26,18 +26,18 @@ class UserResponse {
     user?: User;
 }
 
-@Resolver(User)
+// @Resolver(User)
 export class UserResolver {
-    // Field Resolver logic to not show users emails when fetching posts and getting the creator
-    @FieldResolver(() => String)
-    email(@Root() user: User, @Ctx() { req }: MyContext) {
-        // if this is the current user then it's okay to show them their own email
-        if(req.session.userId === user.id) {
-            return user.email;
-        }
-        // current user wants to see someone else's email
-        return "";
-    }
+    // // Field Resolver logic to not show users emails when fetching posts and getting the creator
+    // @FieldResolver(() => String)
+    // email(@Root() user: User, @Ctx() { req }: MyContext) {
+    //     // if this is the current user then it's okay to show them their own email
+    //     if(req.session.userId && req.session.userId === user.id) {
+    //         return user.email;
+    //     }
+    //     // current user wants to see someone else's email
+    //     return "";
+    // }
 
     @Query(() => User, { nullable: true })
     user(
@@ -54,7 +54,9 @@ export class UserResolver {
         if(!req.session.userId) return null;
         else {
             // else find user by id that is stored in cookie
-            return User.findOne({where: {id: req.session.userId}});
+            return User.findOne(
+                {where: {id: req.session.userId}}
+            );
         }
     }
 
@@ -81,7 +83,7 @@ export class UserResolver {
             //     email: options.email,
             //     username: options.username,
             //     password: hashedPassword
-            // }); TYPEORM EQUIVALENT
+            // }); MIKRO-ORM EQUIVALENT
         } catch (err) {
             // duplicate username error
             if(err.code === '23505') return  {
@@ -103,8 +105,8 @@ export class UserResolver {
     ): Promise<UserResponse> {
         const user = await User.findOne(
             usernameOrEmail.includes('@') 
-            ? { where: {email: usernameOrEmail.toLowerCase()}}
-            :  { where: {username: usernameOrEmail.toLowerCase()}}
+            ? { where: { email: usernameOrEmail }}
+            :  { where: { username: usernameOrEmail }}
         ); // conditionally find user either by email or username
 
         if(!user) return { 
@@ -124,10 +126,8 @@ export class UserResolver {
 
         // if user is found and password is correct, session cookie is stored with user id to know who the authenticated user is. this will set a cookie on the user & keep them logged in until cookie is expired or deleted.
         req.session!.userId = user.id;
-
-        return {
-            user, // if user is found and password is correct, user object is returned
-        };
+        
+        return { user };  // if user is found and password is correct, user object is returned
     }
 
     @Mutation(() => Boolean)
@@ -156,7 +156,7 @@ export class UserResolver {
         @Ctx() { redis } : MyContext
     ) {
         const user = await User.findOne(
-            {where: {email: email }}
+            { where: {email: email } }
         ); // email is not primary key, that's why we need to specify it when searching
         if(!user) {
             // the email is not in the db
