@@ -1,4 +1,5 @@
 /** Environment constants **/
+require('dotenv').config();
 import { 
     COOKIE_NAME, 
     __prod__, 
@@ -27,19 +28,23 @@ const main = async() => {
     // Configure Redis@v4. Cookies will be stored inside redis server since.
     let RedisStore = require("connect-redis")(session)
     let redis = new Redis(); // connect ioredis to redis. original: import { createClient } from "redis"; let redisClient = createClient({ legacyMode: true });
-    redis.connect().catch(console.error)
+    // redis.connect()
 
     app.use(
         session({
             name: COOKIE_NAME,
-            store: new RedisStore({ client: redis }),
+            store: new RedisStore({ 
+                client: redis,
+                disableTouch: true,
+             }),
             saveUninitialized: false, // session creates only when it is set
             secret: "expressjsapollographqlredistypeorm",
             resave: false,
             cookie: {
+                path: '/',
                 maxAge: 1000 * 60 * 60 * 24, // 1 day
                 httpOnly: true,
-                secure: __prod__, // cookie only works in https
+                secure: !__prod__, // cookie only works in https
                 sameSite: 'lax', // csrf protection
             }
         })
@@ -51,23 +56,25 @@ const main = async() => {
             resolvers: [PostResolver, UserResolver, UpvoteResolver],
             validate: false,
         }),
-        context: ({req, res }): MyContext => (
+        cache: 'bounded',
+        context: ({ req, res }): MyContext => (
             { req, res, redis }
         ), //We can access the entity manager, request and response through context
     });
     await server.start();
+    const corsOptions = {
+        origin: [
+            "http://localhost:3000",
+            "https://studio.apollographql.com",
+        ],
+        credentials: true,
+    };
     server.applyMiddleware({ 
         app, 
-        cors: {
-            origin: [
-                "http://localhost:3000",
-                "https://studio.apollographql.com",
-            ],
-            credentials: true,
-        }, 
+        cors: corsOptions, 
     });
 
-    // app.set("trust proxy", 1); //If your server is behind a proxy (Heroku, Nginx, Now, etc...)
+    app.set("trust proxy", !__prod__); //If your server is behind a proxy (Heroku, Nginx, Now, etc...)
 
     app.listen(port, () => {
         console.log('Server started on localhost: ', port);

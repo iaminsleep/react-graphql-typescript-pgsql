@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require('dotenv').config();
 const constants_1 = require("./constants");
 require("reflect-metadata");
 const express_1 = __importDefault(require("express"));
@@ -18,17 +19,20 @@ const main = async () => {
     const port = constants_1.__port__ || 8080;
     let RedisStore = require("connect-redis")(express_session_1.default);
     let redis = new ioredis_1.default();
-    redis.connect().catch(console.error);
     app.use((0, express_session_1.default)({
         name: constants_1.COOKIE_NAME,
-        store: new RedisStore({ client: redis }),
+        store: new RedisStore({
+            client: redis,
+            disableTouch: true,
+        }),
         saveUninitialized: false,
         secret: "expressjsapollographqlredistypeorm",
         resave: false,
         cookie: {
+            path: '/',
             maxAge: 1000 * 60 * 60 * 24,
             httpOnly: true,
-            secure: constants_1.__prod__,
+            secure: !constants_1.__prod__,
             sameSite: 'lax',
         }
     }));
@@ -37,19 +41,22 @@ const main = async () => {
             resolvers: [PostResolver_1.PostResolver, UserResolver_1.UserResolver, UpvoteResolver_1.UpvoteResolver],
             validate: false,
         }),
+        cache: 'bounded',
         context: ({ req, res }) => ({ req, res, redis }),
     });
     await server.start();
+    const corsOptions = {
+        origin: [
+            "http://localhost:3000",
+            "https://studio.apollographql.com",
+        ],
+        credentials: true,
+    };
     server.applyMiddleware({
         app,
-        cors: {
-            origin: [
-                "http://localhost:3000",
-                "https://studio.apollographql.com",
-            ],
-            credentials: true,
-        },
+        cors: corsOptions,
     });
+    app.set("trust proxy", !constants_1.__prod__);
     app.listen(port, () => {
         console.log('Server started on localhost: ', port);
         console.log('Press Ctrl+C to exit');

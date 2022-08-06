@@ -55,7 +55,7 @@ export class UserResolver {
         else {
             // else find user by id that is stored in cookie
             return User.findOne(
-                {where: {id: req.session.userId}}
+                { where: { id: req.session.userId } }
             );
         }
     }
@@ -156,7 +156,7 @@ export class UserResolver {
         @Ctx() { redis } : MyContext
     ) {
         const user = await User.findOne(
-            { where: {email: email } }
+            { where: { email: email } }
         ); // email is not primary key, that's why we need to specify it when searching
         if(!user) {
             // the email is not in the db
@@ -197,7 +197,7 @@ export class UserResolver {
         // rare occasion if user was not found in db
         const userIdNum = parseInt(userId);
         const user = await User.findOne(
-            {where: {id: userIdNum }}
+            { where: {id: userIdNum }}
         );
         if(!user) {
             return { errors: [{field: "token", message: "User no longer exists"}]
@@ -207,8 +207,8 @@ export class UserResolver {
         // hash the password and save in the database
         // await em.fork().persistAndFlush(user);
         User.update(
-            {id: userIdNum}, 
-            {password: await argon2.hash(newPassword)}
+            { id: userIdNum }, 
+            { password: await argon2.hash(newPassword) }
         );
 
         // remove token from redis so you can't change password again

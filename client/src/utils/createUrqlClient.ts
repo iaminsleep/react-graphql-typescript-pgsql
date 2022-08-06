@@ -67,21 +67,22 @@ const cursorPagination = (): Resolver => {
 };
 
 /** Create URQL client */
-export const createUrqlClient = (ssrExchange: any) => {
-    // let cookie = '';
-    // // this code will run only on the server
-    // if(isServer()) {
-    //     cookie = ctx.req.headers.cookie;
-    // }
+export const createUrqlClient = (ssrExchange: any, ctx: any) => {
+    let userIdCookie: string | null = null;
+    // this code will run only on the server
+    if(isServer()) {
+        userIdCookie = ctx.req.cookies.qid;
+        console.log(userIdCookie);
+    }
     return {
         url: "http://localhost:8080/graphql",
         fetchOptions: {
-            credentials: "include" as const, // we need this to get cookies. credentaisl were readonly so we converted it to const
-            // headers: cookie 
-            // ? {
-            //     cookie
-            // } 
-            // : undefined,
+            credentials: "include", // we need this to get cookies. credentaisl were readonly so we converted it to const
+            headers: userIdCookie
+            ? { 
+                Cookie: 'qid='+userIdCookie
+            }
+            : undefined,
         },
         exchanges: [dedupExchange, cacheExchange({
             keys: {
@@ -97,10 +98,10 @@ export const createUrqlClient = (ssrExchange: any) => {
                 Mutation: {
                     vote: (_result, args, cache, info) => {
                         /** this is an alternative method to update data without reloading. in this case, we're not updating the cache, we change values iniside the graphql cache */
-                        const {postId, value} = args as VoteMutationVariables;
+                        const { postId, value } = args as VoteMutationVariables;
                         const data = cache.readFragment(
                             gql `
-                                fragment _ on Post {
+                                fragment respData on Post {
                                     id
                                     points
                                     voteStatus
@@ -111,13 +112,14 @@ export const createUrqlClient = (ssrExchange: any) => {
                             if(data.voteStatus === value) {
                                 return;
                             }
-                            const newPoints = data.points + (!data.voteStatus? 1 : 2) * value;
+                            const newPoints = (data.points as number) + (!data.voteStatus? 1 : 2) * value;
                             cache.writeFragment(
                                 gql `
-                                    fragment __ on Post {
+                                    fragment rewrCache on Post {
                                         points
+                                        voteStatus
                                     }
-                                `, { id: postId, points: newPoints, voteStatus: value }
+                                `, { id: postId, points: newPoints, voteStatus: value } as any
                             ); // update graphql fragment
                         }
                     },

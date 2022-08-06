@@ -42,7 +42,7 @@ export class PostResolver {
             replacements.push(req.session.userId);
         }
 
-        let cursorIndex = 3;
+        let cursorIndex;
         if(cursor) {
             replacements.push(new Date(parseInt(cursor)));
             cursorIndex = replacements.length;
@@ -56,12 +56,15 @@ export class PostResolver {
             ) creator, 
             ${
                 req.session.userId 
-                    ? '(select value from upvote where "userId" = $2 and "postId" = p.id) "voteStatus"' 
+                    ? '(select value from upvote where "userId" = $2 and "postId" = p.id) "voteStatus"'
                     : 'null as "voteStatus"'
             }
             from post p
             inner join public.user u on u.id = p."creatorId"
-            ${cursor ? `where p."createdAt" < $${cursorIndex}` : ''}
+            ${cursor 
+                ? `where p."createdAt" < $${cursorIndex}` 
+                : ''
+            }
             order by p."createdAt" DESC
             limit $1
         `, replacements); // $1 means it will be first replacement. vote status changes only if user is authorized

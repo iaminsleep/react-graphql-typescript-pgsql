@@ -44,7 +44,7 @@ let PostResolver = class PostResolver {
         if (req.session.userId) {
             replacements.push(req.session.userId);
         }
-        let cursorIndex = 3;
+        let cursorIndex;
         if (cursor) {
             replacements.push(new Date(parseInt(cursor)));
             cursorIndex = replacements.length;
@@ -60,7 +60,9 @@ let PostResolver = class PostResolver {
             : 'null as "voteStatus"'}
             from post p
             inner join public.user u on u.id = p."creatorId"
-            ${cursor ? `where p."createdAt" < $${cursorIndex}` : ''}
+            ${cursor
+            ? `where p."createdAt" < $${cursorIndex}`
+            : ''}
             order by p."createdAt" DESC
             limit $1
         `, replacements);

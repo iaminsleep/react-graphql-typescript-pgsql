@@ -18,7 +18,7 @@ export class UpvoteResolver {
 
         // find upvote by post id and user id
         const upvote = await Upvote.findOne(
-            {where: { postId, userId }}
+            { where: { postId, userId }}
         );
         
         // the user was found and he has voted on the post before
