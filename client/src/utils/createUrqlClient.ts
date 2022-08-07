@@ -1,6 +1,6 @@
 import { cacheExchange, Resolver } from "@urql/exchange-graphcache";
 import { dedupExchange, Exchange, fetchExchange, stringifyVariables } from "urql";
-import { LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation, VoteMutationVariables } from "../generated/graphql";
+import { DeletePostMutationVariables, LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation, VoteMutationVariables } from "../generated/graphql";
 import { betterUpdateQuery } from './betterUpdateQuery';
 import { pipe, tap } from 'wonka';
 import Router from "next/router";
@@ -67,12 +67,11 @@ const cursorPagination = (): Resolver => {
 };
 
 /** Create URQL client */
-export const createUrqlClient = (ssrExchange: any, ctx: any) => {
+export const createUrqlClient = (ssrExchange: any, ctx: any): any => {
     let userIdCookie: string | null = null;
     // this code will run only on the server
     if(isServer()) {
-        userIdCookie = ctx.req.cookies.qid;
-        console.log(userIdCookie);
+        userIdCookie = ctx?.req?.cookies?.qid;
     }
     return {
         url: "http://localhost:8080/graphql",
@@ -96,6 +95,12 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
             updates: {
                 // these functions will run whenever mutation or query function will run to update cache, without them the pages would save the state into cache and you would have to refresh the page to update state (pretty annoying).
                 Mutation: {
+                    deletePost: (_result, args, cache, info) => {
+                        cache.invalidate({ 
+                            __typename: "Post",
+                            id: (args as DeletePostMutationVariables).id,
+                        })
+                    },
                     vote: (_result, args, cache, info) => {
                         /** this is an alternative method to update data without reloading. in this case, we're not updating the cache, we change values iniside the graphql cache */
                         const { postId, value } = args as VoteMutationVariables;

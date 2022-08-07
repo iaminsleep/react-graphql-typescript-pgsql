@@ -13,6 +13,7 @@ import { ApolloServer } from "apollo-server-express"; // For GraphQL
 import { buildSchema } from "type-graphql"; // Typescript GraphQL
 import session from "express-session"; // for Redis
 import Redis from "ioredis"; // Redis
+import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 
 /** Resolvers **/
 import { PostResolver } from "./resolvers/PostResolver";
@@ -44,7 +45,7 @@ const main = async() => {
                 path: '/',
                 maxAge: 1000 * 60 * 60 * 24, // 1 day
                 httpOnly: true,
-                secure: !__prod__, // cookie only works in https
+                secure: __prod__, // cookie only works in https
                 sameSite: 'lax', // csrf protection
             }
         })
@@ -53,15 +54,23 @@ const main = async() => {
     // Configure ApolloGraphQL server
     const server = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [PostResolver, UserResolver, UpvoteResolver],
+            resolvers: [
+                PostResolver, 
+                UserResolver, 
+                UpvoteResolver
+            ],
             validate: false,
         }),
         cache: 'bounded',
         context: ({ req, res }): MyContext => (
             { req, res, redis }
         ), //We can access the entity manager, request and response through context
+        plugins: [
+            ApolloServerPluginLandingPageLocalDefault(),
+        ],
     });
     await server.start();
+    
     const corsOptions = {
         origin: [
             "http://localhost:3000",
@@ -74,10 +83,10 @@ const main = async() => {
         cors: corsOptions, 
     });
 
-    app.set("trust proxy", !__prod__); //If your server is behind a proxy (Heroku, Nginx, Now, etc...)
+    app.set("trust proxy", __prod__); //If your server is behind a proxy (Heroku, Nginx, Now, etc...)
 
     app.listen(port, () => {
-        console.log('Server started on localhost: ', port);
+        console.log('Server started on localhost:', port);
         console.log('Press Ctrl+C to exit');
     });
 }

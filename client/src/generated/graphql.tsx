@@ -69,7 +69,8 @@ export type MutationRegisterArgs = {
 
 export type MutationUpdatePostArgs = {
   id: Scalars['Int'];
-  title?: InputMaybe<Scalars['String']>;
+  text: Scalars['String'];
+  title: Scalars['String'];
 };
 
 
@@ -113,7 +114,7 @@ export type Query = {
 
 
 export type QueryPostArgs = {
-  id: Scalars['Float'];
+  id: Scalars['Int'];
 };
 
 
@@ -148,9 +149,11 @@ export type UsernamePasswordInput = {
   username: Scalars['String'];
 };
 
-export type PostSnippetFragment = { __typename?: 'Post', id: number, title: string, createdAt: string, updatedAt: string, textSnippet: string, points: number, voteStatus?: number | null, creator: { __typename?: 'User', id: number, username: string } };
+export type PostPreviewSnippetFragment = { __typename?: 'Post', id: number, title: string, createdAt: string, updatedAt: string, textSnippet: string, points: number, voteStatus?: number | null, creator: { __typename?: 'User', id: number, username: string } };
 
 export type RegularErrorFragment = { __typename?: 'FieldError', field: string, message: string };
+
+export type RegularPostFragment = { __typename?: 'Post', id: number, title: string, createdAt: string, updatedAt: string, text: string, points: number, voteStatus?: number | null, creator: { __typename?: 'User', id: number, username: string } };
 
 export type RegularUserFragment = { __typename?: 'User', id: number, username: string };
 
@@ -170,6 +173,13 @@ export type CreatePostMutationVariables = Exact<{
 
 
 export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', id: number, title: string, text: string, createdAt: string, updatedAt: string, creatorId: number } };
+
+export type DeletePostMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type DeletePostMutation = { __typename?: 'Mutation', deletePost: boolean };
 
 export type ForgotPasswordMutationVariables = Exact<{
   email: Scalars['String'];
@@ -198,6 +208,15 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, username: string } | null } };
 
+export type UpdatePostMutationVariables = Exact<{
+  id: Scalars['Int'];
+  title: Scalars['String'];
+  text: Scalars['String'];
+}>;
+
+
+export type UpdatePostMutation = { __typename?: 'Mutation', updatePost: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string, text: string, textSnippet: string } };
+
 export type VoteMutationVariables = Exact<{
   value: Scalars['Int'];
   postId: Scalars['Int'];
@@ -205,6 +224,13 @@ export type VoteMutationVariables = Exact<{
 
 
 export type VoteMutation = { __typename?: 'Mutation', vote: boolean };
+
+export type GetPostQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type GetPostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, title: string, createdAt: string, updatedAt: string, text: string, points: number, voteStatus?: number | null, creator: { __typename?: 'User', id: number, username: string } } | null };
 
 export type GetPostsQueryVariables = Exact<{
   limit: Scalars['Int'];
@@ -219,13 +245,28 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, username: string } | null };
 
-export const PostSnippetFragmentDoc = gql`
-    fragment PostSnippet on Post {
+export const PostPreviewSnippetFragmentDoc = gql`
+    fragment PostPreviewSnippet on Post {
   id
   title
   createdAt
   updatedAt
   textSnippet
+  points
+  voteStatus
+  creator {
+    id
+    username
+  }
+}
+    `;
+export const RegularPostFragmentDoc = gql`
+    fragment RegularPost on Post {
+  id
+  title
+  createdAt
+  updatedAt
+  text
   points
   voteStatus
   creator {
@@ -284,6 +325,15 @@ export const CreatePostDocument = gql`
 export function useCreatePostMutation() {
   return Urql.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument);
 };
+export const DeletePostDocument = gql`
+    mutation DeletePost($id: Int!) {
+  deletePost(id: $id)
+}
+    `;
+
+export function useDeletePostMutation() {
+  return Urql.useMutation<DeletePostMutation, DeletePostMutationVariables>(DeletePostDocument);
+};
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($email: String!) {
   forgotPassword(email: $email)
@@ -324,6 +374,22 @@ export const RegisterDocument = gql`
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
 };
+export const UpdatePostDocument = gql`
+    mutation UpdatePost($id: Int!, $title: String!, $text: String!) {
+  updatePost(id: $id, title: $title, text: $text) {
+    id
+    createdAt
+    updatedAt
+    title
+    text
+    textSnippet
+  }
+}
+    `;
+
+export function useUpdatePostMutation() {
+  return Urql.useMutation<UpdatePostMutation, UpdatePostMutationVariables>(UpdatePostDocument);
+};
 export const VoteDocument = gql`
     mutation Vote($value: Int!, $postId: Int!) {
   vote(value: $value, postId: $postId)
@@ -333,16 +399,27 @@ export const VoteDocument = gql`
 export function useVoteMutation() {
   return Urql.useMutation<VoteMutation, VoteMutationVariables>(VoteDocument);
 };
+export const GetPostDocument = gql`
+    query GetPost($id: Int!) {
+  post(id: $id) {
+    ...RegularPost
+  }
+}
+    ${RegularPostFragmentDoc}`;
+
+export function useGetPostQuery(options: Omit<Urql.UseQueryArgs<GetPostQueryVariables>, 'query'>) {
+  return Urql.useQuery<GetPostQuery>({ query: GetPostDocument, ...options });
+};
 export const GetPostsDocument = gql`
     query GetPosts($limit: Int!, $cursor: String) {
   posts(limit: $limit, cursor: $cursor) {
     posts {
-      ...PostSnippet
+      ...PostPreviewSnippet
     }
     hasMore
   }
 }
-    ${PostSnippetFragmentDoc}`;
+    ${PostPreviewSnippetFragmentDoc}`;
 
 export function useGetPostsQuery(options: Omit<Urql.UseQueryArgs<GetPostsQueryVariables>, 'query'>) {
   return Urql.useQuery<GetPostsQuery>({ query: GetPostsDocument, ...options });

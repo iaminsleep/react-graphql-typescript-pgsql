@@ -1,4 +1,4 @@
-fragment PostSnippet on Post {
+fragment PostPreviewSnippet on Post {
     id
     title
     createdAt

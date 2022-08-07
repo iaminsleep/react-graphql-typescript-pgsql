@@ -33,7 +33,9 @@ export class Upvote extends BaseEntity
     postId: number; // allow many to one relationship
 
     @Field(() => Post)
-    @ManyToOne(() => Post, (post) => post.upvotes)
+    @ManyToOne(() => Post, (post) => post.upvotes, {
+        onDelete: "CASCADE", // if post is deleted it'll delete every connected db table rows (upvote table for example)
+    })
     post: Post; // create constaint for creatorId
 
 }

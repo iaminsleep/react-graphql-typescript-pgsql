@@ -1,0 +1,15 @@
+# The difference is that we don't use the textSnippet, which is the preview of the post, but the whole text as we are on the post page itself
+
+fragment RegularPost on Post {
+    id
+    title
+    createdAt
+    updatedAt
+    text
+    points
+    voteStatus
+    creator {
+        id
+        username
+    }
+}
