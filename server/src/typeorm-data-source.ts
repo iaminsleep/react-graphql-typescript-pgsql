@@ -3,15 +3,16 @@ import { Post } from './entities/Post';
 import { User } from './entities/User';
 import path from 'path';
 import { Upvote } from './entities/Upvote';
+import { __prod__ } from './constants';
 
 export const AppDataSource = new DataSource({
     type: 'postgres',
-    database: 'twitter',
-    username: 'postgres',
-    password: 'password',
-    port: 5432,
+    database: process.env.DATABASE_NAME,
+    username: process.env.DATABASE_USER,
+    password: process.env.DATABASE_PASSWORD,
+    port: Number(process.env.DATABASE_PORT),
     logging: true,
-    synchronize: true, // synchronize: true migrates automatically at the start
+    synchronize: !__prod__, // synchronize: true migrates automatically at the start
     migrations: [path.join(__dirname, './migrations/*{.ts,.js}')],
     entities: [Post, User, Upvote],
 });
@@ -22,7 +23,7 @@ export const AppDataSource = new DataSource({
 AppDataSource.initialize()
     .then(() => {
         // here you can start to work with your database
-        // AppDataSource.runMigrations(); //to run migrations in index.ts
+        AppDataSource.runMigrations(); //to run migrations in index.ts
         // User.delete({});
         // Post.delete({});
     })

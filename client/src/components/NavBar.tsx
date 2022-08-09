@@ -3,10 +3,13 @@ import NextLink from "next/link";
 import { useEffect, useState } from "react";
 import { useMeQuery, useLogoutMutation } from "../generated/graphql";
 import { isServer } from "../utils/isServer";
+import { useRouter } from 'next/router';
 
 interface NavBarProps {}
 
 export const NavBar: React.FC<NavBarProps> = ({}) => {
+    const router = useRouter();
+
     const [isServerRendered, setIsServerRendered] = useState(false);
     useEffect(() => {
         if(isServer()) {
@@ -49,7 +52,10 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
                 <Spacer/>
                 <Box mr={2}>{ data.me.username }</Box>
                 <Button 
-                    onClick={() => logout()} 
+                    onClick={async () => {
+                        await logout();
+                        router.reload();
+                    }}
                     isLoading={logoutFetching}
                     variant="link"
                 >Logout</Button>

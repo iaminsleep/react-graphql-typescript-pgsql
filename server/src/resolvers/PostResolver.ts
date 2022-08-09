@@ -5,6 +5,7 @@ import { MyContext } from "../types";
 import { isAuth } from "../middleware/isAuth";
 import { PostInput } from "../utils/PostInput";
 import { AppDataSource } from "../typeorm-data-source";
+import { User } from "../entities/User";
 // import { Upvote } from "../entities/Upvote";
 
 @ObjectType()
@@ -19,8 +20,35 @@ class PaginatedPosts {
 @Resolver(Post)
 export class PostResolver {
     @FieldResolver(() => String)
-    textSnippet(@Root() root: Post) {
-        return root.text.slice(0, 50);
+    textSnippet(@Root() post: Post) {
+        return post.text.slice(0, 50);
+    }
+
+    @FieldResolver(() => User)
+    creator(
+        @Root() post: Post,
+        @Ctx() {userLoader}: MyContext
+    ) {
+        // Without DataLoader
+        // return User.findOne({ where: {id: post.creatorId}});
+
+        //With DataLoader
+        return userLoader.load(post.creatorId); // What DataLoader does is this batches all the post ids into a single query using an array of numbers
+    }
+
+    @FieldResolver(() => Int, { nullable: true })
+    async voteStatus(
+        @Root() post: Post,
+        @Ctx() { upvoteLoader, req }: MyContext
+    ) {
+        if(!req.session.userId) return null;
+
+        const upvote = await upvoteLoader.load({ 
+            postId: post.id, 
+            userId: req.session.userId 
+        })
+
+        return upvote ? upvote.value : null; // return vote status - if the authenitcated user voted on the post
     }
 
     /** CRUD Operations Through GraphQL */
@@ -28,7 +56,6 @@ export class PostResolver {
     async posts(
         @Arg('limit', () => Int) limit: number, // limit of posts
         @Arg('cursor', () => String, { nullable: true}) cursor: string | null,
-        @Ctx() { req }: MyContext
     ): Promise<PaginatedPosts> {
         await sleep(3000); // keep for fun, impacts delete post speed
         // return Post.find(); // returns Promise of ALL posts - completion of asynchronous operation.
@@ -38,32 +65,16 @@ export class PostResolver {
         const limitPaginationNumber = realLimit + 1;
 
         const replacements: any[] = [limitPaginationNumber];
- 
-        if(req.session.userId) {
-            replacements.push(req.session.userId);
-        }
 
-        let cursorIndex;
         if(cursor) {
             replacements.push(new Date(parseInt(cursor)));
-            cursorIndex = replacements.length;
         }
 
         const posts = await AppDataSource.query(`
-            select p.*, json_build_object(
-                'id', u.id,
-                'username', u.username,
-                'email', u.email
-            ) creator, 
-            ${
-                req.session.userId 
-                    ? '(select value from upvote where "userId" = $2 and "postId" = p.id) "voteStatus"'
-                    : 'null as "voteStatus"'
-            }
+            select p.*
             from post p
-            inner join public.user u on u.id = p."creatorId"
             ${cursor 
-                ? `where p."createdAt" < $${cursorIndex}` 
+                ? 'where p."createdAt" < $2'
                 : ''
             }
             order by p."createdAt" DESC
@@ -100,7 +111,7 @@ export class PostResolver {
     {
         return Post.findOne({ 
             where: { id }, 
-            relations: ["creator"] 
+            // relations: ["creator"] if you use json_buildobject and INNER JOIN in posts query
         });
     }
 

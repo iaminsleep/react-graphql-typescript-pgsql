@@ -47,6 +47,7 @@ export const EditPost = ({}) => {
                         {id: intId, ...values}
                     );
                     if(!error) router.push('/');
+                    // router.back();
                 }}
             >
                 {({ isSubmitting }) => (
@@ -75,12 +76,6 @@ export const EditPost = ({}) => {
             </Formik>
         </Layout>
     );
-}
-
-// ChangePassword.getInitialProps = ({query}) => { // get any query parameters and pass to original function
-//     return {
-//         token: query.token as string // cast token as string
-//     } another way instead of using 'router.query.token'
-// }
+} 
 
 export default withUrqlClient(createUrqlClient)(EditPost);

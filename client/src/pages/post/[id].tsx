@@ -3,6 +3,7 @@
 import { Box, Heading } from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
 import { Layout } from "../../components/Layout";
+import { PostButtons } from "../../components/PostButtons";
 import { createUrqlClient } from "../../utils/createUrqlClient";
 import { useGetPostFromUrl } from "../../utils/useGetPostFromUrl";
 
@@ -28,7 +29,13 @@ export const Post = ({}) => {
     return (
         <Layout>
             <Heading>{data?.post?.title}</Heading>
-            {data?.post?.text}
+            <Box>{data?.post?.text}</Box>
+            <Box>
+                <PostButtons 
+                    postId={data?.post?.id} 
+                    creatorId={data?.post?.creator.id}
+                />
+            </Box>
         </Layout>
     );
 }

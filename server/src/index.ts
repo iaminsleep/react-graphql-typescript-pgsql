@@ -1,5 +1,7 @@
-/** Environment constants **/
-require('dotenv').config();
+require('dotenv-safe').config({
+    allowEmptyValues: true,
+    example: './.env.example'
+});
 import { 
     COOKIE_NAME, 
     __prod__, 
@@ -20,6 +22,7 @@ import { PostResolver } from "./resolvers/PostResolver";
 import { UserResolver } from "./resolvers/UserResolver";
 import { MyContext } from "./types";
 import { UpvoteResolver } from "./resolvers/UpvoteResolver";
+import { createUpvoteLoader, createUserLoader } from "./utils/DataLoader";
 
 const main = async() => {
     // Initialize app
@@ -39,7 +42,7 @@ const main = async() => {
                 disableTouch: true,
              }),
             saveUninitialized: false, // session creates only when it is set
-            secret: "expressjsapollographqlredistypeorm",
+            secret: process.env.SESSION_SECRET!,
             resave: false,
             cookie: {
                 path: '/',
@@ -62,9 +65,13 @@ const main = async() => {
             validate: false,
         }),
         cache: 'bounded',
-        context: ({ req, res }): MyContext => (
-            { req, res, redis }
-        ), //We can access the entity manager, request and response through context
+        context: ({ req, res }): MyContext => ({ 
+            req, 
+            res, 
+            redis, 
+            userLoader: createUserLoader(), 
+            upvoteLoader: createUpvoteLoader()
+        }), //We can access the entity manager, request and response through context
         plugins: [
             ApolloServerPluginLandingPageLocalDefault(),
         ],
@@ -73,8 +80,7 @@ const main = async() => {
     
     const corsOptions = {
         origin: [
-            "http://localhost:3000",
-            "https://studio.apollographql.com",
+            process.env.CORS_ORIGIN!,
         ],
         credentials: true,
     };

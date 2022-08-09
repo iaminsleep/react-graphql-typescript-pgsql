@@ -3,7 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-require('dotenv').config();
+require('dotenv-safe').config({
+    allowEmptyValues: true,
+    example: './.env.example'
+});
 const constants_1 = require("./constants");
 require("reflect-metadata");
 const express_1 = __importDefault(require("express"));
@@ -15,6 +18,7 @@ const apollo_server_core_1 = require("apollo-server-core");
 const PostResolver_1 = require("./resolvers/PostResolver");
 const UserResolver_1 = require("./resolvers/UserResolver");
 const UpvoteResolver_1 = require("./resolvers/UpvoteResolver");
+const DataLoader_1 = require("./utils/DataLoader");
 const main = async () => {
     const app = (0, express_1.default)();
     const port = constants_1.__port__ || 8080;
@@ -27,7 +31,7 @@ const main = async () => {
             disableTouch: true,
         }),
         saveUninitialized: false,
-        secret: "expressjsapollographqlredistypeorm",
+        secret: process.env.SESSION_SECRET,
         resave: false,
         cookie: {
             path: '/',
@@ -47,7 +51,13 @@ const main = async () => {
             validate: false,
         }),
         cache: 'bounded',
-        context: ({ req, res }) => ({ req, res, redis }),
+        context: ({ req, res }) => ({
+            req,
+            res,
+            redis,
+            userLoader: (0, DataLoader_1.createUserLoader)(),
+            upvoteLoader: (0, DataLoader_1.createUpvoteLoader)()
+        }),
         plugins: [
             (0, apollo_server_core_1.ApolloServerPluginLandingPageLocalDefault)(),
         ],
@@ -55,8 +65,7 @@ const main = async () => {
     await server.start();
     const corsOptions = {
         origin: [
-            "http://localhost:3000",
-            "https://studio.apollographql.com",
+            process.env.CORS_ORIGIN,
         ],
         credentials: true,
     };

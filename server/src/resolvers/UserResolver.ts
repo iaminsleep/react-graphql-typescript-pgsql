@@ -168,7 +168,7 @@ export class UserResolver {
         await redis.set(FORGET_PASSWORD_PREFIX + token, user.id, 'EX', 1000 * 60 * 60 * 24 * 2); // store the token inside redis database that will look like: 'forget-password:qeioe-rwetg423-dsd-dsf', expires after 2 days
 
         await sendEmail(email, 
-            `<a href="http://localhost:3000/change-password/${token}">Click this link to reset your password</a>`
+            `<a href="${process.env.CORS_ORIGIN}/change-password/${token}">Click this link to reset your password</a>`
         );
 
         return true; // return true anyway
