@@ -2,9 +2,9 @@ import { isAuth } from "../middleware/isAuth";
 import { AppDataSource } from "../typeorm-data-source";
 import { MyContext } from "../types";
 import { Arg, Ctx, Int, Mutation, UseMiddleware } from "type-graphql";
-import { Upvote } from "../entities/Upvote";
+import { Like } from "../entities/Like";
 
-export class UpvoteResolver {
+export class LikeResolver {
     @Mutation(() => Boolean) // return boolean if worked or not
     @UseMiddleware(isAuth)
     async vote(
@@ -17,12 +17,12 @@ export class UpvoteResolver {
         const { userId } = req.session;
 
         // find upvote by post id and user id
-        const upvote = await Upvote.findOne(
+        const upvote = await Like.findOne(
             { where: { postId, userId }}
         );
         
         // the user was found and he has voted on the post before
-        if(upvote && upvote.value !== realValue) { 
+        if(upvote) { // && upvote.value !== realValue
             // double check if the user has upvoted or downvoted so they are changing from upvote to downvote
             await AppDataSource.transaction(async transactionManager => {
                 // /** The role of transaction is when one query fails, the others fail as well */

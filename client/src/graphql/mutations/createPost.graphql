@@ -1,8 +1,8 @@
 mutation CreatePost($input: PostInput!) {
     createPost(input: $input) {
         id
-        title
         text
+        image
         createdAt
         updatedAt
         creatorId

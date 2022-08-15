@@ -72,7 +72,7 @@ class UserResolver {
         try {
             const result = await typeorm_data_source_1.AppDataSource.createQueryBuilder().insert().into(User_1.User).values({
                 email: options.email,
-                username: options.username,
+                login: options.login.toLowerCase(),
                 password: hashedPassword
             }).returning('*').execute();
             user = result.raw[0];
@@ -88,14 +88,14 @@ class UserResolver {
         }
         return { user };
     }
-    async login(usernameOrEmail, password, { req }) {
-        const user = await User_1.User.findOne(usernameOrEmail.includes('@')
-            ? { where: { email: usernameOrEmail } }
-            : { where: { username: usernameOrEmail } });
+    async login(loginOrEmail, password, { req }) {
+        const user = await User_1.User.findOne(loginOrEmail.includes('@')
+            ? { where: { email: loginOrEmail } }
+            : { where: { login: loginOrEmail } });
         if (!user)
             return {
                 errors: [{
-                        field: 'usernameOrEmail',
+                        field: 'loginOrEmail',
                         message: "That user doesn't exist.",
                     }]
             };
@@ -176,7 +176,7 @@ __decorate([
 ], UserResolver.prototype, "register", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => UserResponse),
-    __param(0, (0, type_graphql_1.Arg)('usernameOrEmail')),
+    __param(0, (0, type_graphql_1.Arg)('loginOrEmail')),
     __param(1, (0, type_graphql_1.Arg)('password')),
     __param(2, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),

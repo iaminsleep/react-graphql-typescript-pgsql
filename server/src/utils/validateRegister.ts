@@ -10,7 +10,7 @@ export const validateRegister = (options: UsernamePasswordInput) => {
     }
 
     // username field validation
-    if(options.username.length <= 2) { 
+    if(options.login.length <= 2) { 
         return [{ 
             field: 'username', 
             message: 'Username length must be greater than 2.'
@@ -18,7 +18,7 @@ export const validateRegister = (options: UsernamePasswordInput) => {
     }
 
     // username not containing @ validation
-    if(options.username.includes('@')) { 
+    if(options.login.includes('@')) { 
         return [{ 
             field: 'username', 
             message: 'Prohibited symbol'

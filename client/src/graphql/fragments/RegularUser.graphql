@@ -2,5 +2,6 @@
 
 fragment RegularUser on User {
     id
-    username
+    email
+    login
 }

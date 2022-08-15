@@ -20,7 +20,7 @@ __decorate([
 __decorate([
     (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
-], UsernamePasswordInput.prototype, "username", void 0);
+], UsernamePasswordInput.prototype, "login", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
     __metadata("design:type", String)

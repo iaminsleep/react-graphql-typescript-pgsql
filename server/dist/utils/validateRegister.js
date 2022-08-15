@@ -8,13 +8,13 @@ const validateRegister = (options) => {
                 message: 'Invalid email'
             }];
     }
-    if (options.username.length <= 2) {
+    if (options.login.length <= 2) {
         return [{
                 field: 'username',
                 message: 'Username length must be greater than 2.'
             }];
     }
-    if (options.username.includes('@')) {
+    if (options.login.includes('@')) {
         return [{
                 field: 'username',
                 message: 'Prohibited symbol'

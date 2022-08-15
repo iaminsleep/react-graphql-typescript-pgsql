@@ -48,7 +48,7 @@ export class PostResolver {
             userId: req.session.userId 
         })
 
-        return upvote ? upvote.value : null; // return vote status - if the authenitcated user voted on the post
+        return upvote; // return vote status - if the authenitcated user voted on the post
     }
 
     /** CRUD Operations Through GraphQL */
@@ -111,7 +111,7 @@ export class PostResolver {
     {
         return Post.findOne({ 
             where: { id }, 
-            // relations: ["creator"] if you use json_buildobject and INNER JOIN in posts query
+            // relations: ["creator"] in case you use json_buildobject and INNER JOIN in posts() query above
         });
     }
 
@@ -121,7 +121,14 @@ export class PostResolver {
         @Arg('input') input: PostInput,
         @Ctx() { req }: MyContext
     ): Promise<Post> {
+        const queryRunner = AppDataSource.createQueryRunner();
+        var result = await queryRunner.manager.query(
+            `SELECT max(id) FROM post`
+        );
+        const lastId = result[0].max;
+
         return Post.create({
+            id: lastId + 1,
             ...input, // paste user input
             creatorId: req.session.userId // take userid from express-session (not redis database!)
         }).save(); // save() function from typeorm equivalent to MikroORM's 'persistAndFlush()'
@@ -151,7 +158,7 @@ export class PostResolver {
             const queryResult = await AppDataSource
                 .createQueryBuilder()
                 .update(Post)
-                .set({ title, text })
+                .set({ text })
                 .where('id = :id and "creatorId" = :creatorId', { 
                     id, creatorId: req.session.userId 
                 })

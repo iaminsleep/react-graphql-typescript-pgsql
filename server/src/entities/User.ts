@@ -4,7 +4,7 @@ import {
   Entity, BaseEntity, PrimaryGeneratedColumn, 
   UpdateDateColumn, OneToMany } from 'typeorm';
 import { Post } from "./Post";
-import { Upvote } from "./Upvote";
+import { Like } from "./Like";
 
 @ObjectType() // Turn the object into GraphQL object
 @Entity()
@@ -20,16 +20,24 @@ export class User extends BaseEntity
 
   @Field()
   @Column({ unique: true })
-  username!: string;
+  login!: string;
 
-  @Column() // deletion of @Field property makes impossible to select password (for the security issues)
+  @Column() // deletion of @Field property makes impossible to select password (for the security matter)
   password!: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  username: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  avatar: string;
 
   @OneToMany(() => Post, (post) => post.creator)
   posts: Post[];
 
-  @OneToMany(() => Upvote, (upvote) => upvote.user)
-  upvotes: Upvote[];
+  @OneToMany(() => Like, (like) => like.user)
+  likes: Like[];
 
   @Field(() => String)
   @CreateDateColumn()

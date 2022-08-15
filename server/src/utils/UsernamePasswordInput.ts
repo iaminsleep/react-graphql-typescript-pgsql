@@ -6,7 +6,7 @@ export class UsernamePasswordInput {
     @Field()
     email: string;
     @Field()
-    username: string;
+    login: string;
     @Field(() => String) // if you want to overwrite the type that we explicitly set
     password: string;
 }

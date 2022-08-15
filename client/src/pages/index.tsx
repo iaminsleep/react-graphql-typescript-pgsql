@@ -8,6 +8,8 @@ import NextLink from 'next/link';
 import { UpvoteSection } from '../components/UpvoteSection';
 import { Link } from '@chakra-ui/react';
 import { PostButtons } from '../components/PostButtons';
+import Head from 'next/head';
+import { Tweet } from '../components/Tweet';
 
 const Index = () => {
   const [variables, setVariables] = useState({ 
@@ -29,14 +31,19 @@ const Index = () => {
 
   return (
     <Layout>
+      <Head>
+        <title>Twitter</title>
+      </Head>
       {/* if data is true, the posts are going to show. */}
       {!data && fetching ? (
         <div>Loading...</div>
       ) : (
-        <Stack spacing={8}>
+        <ul className="tweet-list">
           {data!.posts.posts.map((post) => // ! exclamation point tells us that data variable is definitely going to have data
           !post ? null : // some posts may be null, so we use this to not show already deleted post, otherwise they throw an error. it is used for invalidating cache
           ( 
+            <>
+            <Tweet post={post}></Tweet>
             <Flex key={post.id} p={5} shadow="md" borderWidth="1px">
               <UpvoteSection post={post}/>
               <Box flex={1}>
@@ -61,8 +68,9 @@ const Index = () => {
                 </Flex>
               </Box>       
             </Flex>
+            </>
           ))}
-        </Stack>    
+        </ul>    
       )}
       { data && data.posts.hasMore ? ( 
         <Flex>

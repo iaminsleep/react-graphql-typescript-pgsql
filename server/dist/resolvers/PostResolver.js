@@ -47,7 +47,7 @@ let PostResolver = class PostResolver {
             postId: post.id,
             userId: req.session.userId
         });
-        return upvote ? upvote.value : null;
+        return upvote;
     }
     async posts(limit, cursor) {
         await (0, sleep_1.sleep)(3000);
@@ -77,7 +77,10 @@ let PostResolver = class PostResolver {
         });
     }
     async createPost(input, { req }) {
-        return Post_1.Post.create(Object.assign(Object.assign({}, input), { creatorId: req.session.userId })).save();
+        const queryRunner = typeorm_data_source_1.AppDataSource.createQueryRunner();
+        var result = await queryRunner.manager.query(`SELECT max(id) FROM post`);
+        const lastId = result[0].max;
+        return Post_1.Post.create(Object.assign(Object.assign({ id: lastId + 1 }, input), { creatorId: req.session.userId })).save();
     }
     async updatePost(id, title, text, { req }) {
         const post = await Post_1.Post.findOne({ where: { id } });
@@ -91,7 +94,7 @@ let PostResolver = class PostResolver {
             const queryResult = await typeorm_data_source_1.AppDataSource
                 .createQueryBuilder()
                 .update(Post_1.Post)
-                .set({ title, text })
+                .set({ text })
                 .where('id = :id and "creatorId" = :creatorId', {
                 id, creatorId: req.session.userId
             })

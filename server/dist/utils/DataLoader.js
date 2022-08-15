@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createUpvoteLoader = exports.createUserLoader = void 0;
 const dataloader_1 = __importDefault(require("dataloader"));
-const Upvote_1 = require("../entities/Upvote");
+const Like_1 = require("../entities/Like");
 const User_1 = require("../entities/User");
 const createUserLoader = () => new dataloader_1.default(async (userIds) => {
     const users = await User_1.User.findByIds(userIds);
@@ -18,13 +18,13 @@ const createUserLoader = () => new dataloader_1.default(async (userIds) => {
 });
 exports.createUserLoader = createUserLoader;
 const createUpvoteLoader = () => new dataloader_1.default(async (keys) => {
-    const upvotes = await Upvote_1.Upvote.findByIds(keys);
-    const upvoteIdsToUser = {};
-    upvotes.forEach(upvote => {
-        upvoteIdsToUser[`${upvote.userId}|${upvote.postId}`] = upvote;
+    const likes = await Like_1.Like.findByIds(keys);
+    const likeIdsToUser = {};
+    likes.forEach(like => {
+        likeIdsToUser[`${like.userId}|${like.postId}`] = like;
     });
-    const upvotesArray = keys.map((key) => upvoteIdsToUser[`${key.userId}|${key.postId}`]);
-    return upvotesArray;
+    const likesArray = keys.map((key) => likeIdsToUser[`${key.userId}|${key.postId}`]);
+    return likesArray;
 });
 exports.createUpvoteLoader = createUpvoteLoader;
 //# sourceMappingURL=DataLoader.js.map

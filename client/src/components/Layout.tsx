@@ -1,19 +1,42 @@
-import { NavBar } from "./NavBar"
+import Head from "next/head";
+import { useState } from "react";
+import { AuthModal } from "./AuthModal";
+import { Header } from "./Header"
+import { NavBar } from "./NavBar";
 import { Wrapper } from "./Wrapper"
-import { WrapperVariant } from './Wrapper';
 
 interface LayoutProps {
     children: any,
-    variant?: WrapperVariant; 
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children, variant }) => {
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
+    const [isModalOpen, setModalOpen] = useState(false);
+
+    const openModal = () => {
+        setModalOpen(true);
+    }
+    const closeModal = () => {
+        setModalOpen(false);
+    }
+
     return (
         <>
-            <NavBar></NavBar>
-            <Wrapper variant={variant}>
-                {children}
-            </Wrapper>
+            <Head>
+                <link rel="icon" href="img/twitter.png"/>
+            </Head>
+            <div className="container row">
+                <Header openModal={openModal}></Header>
+                <main className="main">
+                    <NavBar></NavBar>
+                    <Wrapper>
+                        { children }
+                    </Wrapper>
+                </main>
+            </div>
+            { isModalOpen 
+                ? <AuthModal closeModal={closeModal}></AuthModal>
+                : ''
+            }
         </>
     );
 }

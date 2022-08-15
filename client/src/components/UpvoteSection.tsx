@@ -1,11 +1,11 @@
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { Flex, IconButton } from "@chakra-ui/react";
 import { useState } from "react";
-import { PostSnippetFragment, useVoteMutation } from "../generated/graphql";
+import { PostPreviewSnippetFragment, useVoteMutation } from "../generated/graphql";
 
 // specify what do you pass in component in inteface 
 interface UpvoteSectionProps {
-    post: PostSnippetFragment // equals to GetPostsQuery['posts']['posts'][0],
+    post: PostPreviewSnippetFragment // equals to GetPostsQuery['posts']['posts'][0],
 }
 
 export const UpvoteSection: React.FC<UpvoteSectionProps> = ({ post }) => {

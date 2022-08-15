@@ -9,48 +9,43 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Upvote = void 0;
+exports.Like = void 0;
 const typeorm_1 = require("typeorm");
 const type_graphql_1 = require("type-graphql");
 const User_1 = require("./User");
 const Post_1 = require("./Post");
-let Upvote = class Upvote extends typeorm_1.BaseEntity {
+let Like = class Like extends typeorm_1.BaseEntity {
 };
 __decorate([
     (0, type_graphql_1.Field)(),
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Upvote.prototype, "id", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(),
-    (0, typeorm_1.Column)({ type: "int" }),
-    __metadata("design:type", Number)
-], Upvote.prototype, "value", void 0);
+], Like.prototype, "id", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
     (0, typeorm_1.PrimaryColumn)(),
     __metadata("design:type", Number)
-], Upvote.prototype, "userId", void 0);
+], Like.prototype, "userId", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => User_1.User),
-    (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.upvotes),
+    (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.likes),
     __metadata("design:type", User_1.User)
-], Upvote.prototype, "user", void 0);
+], Like.prototype, "user", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
     (0, typeorm_1.PrimaryColumn)(),
     __metadata("design:type", Number)
-], Upvote.prototype, "postId", void 0);
+], Like.prototype, "postId", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => Post_1.Post),
-    (0, typeorm_1.ManyToOne)(() => Post_1.Post, (post) => post.upvotes, {
+    (0, typeorm_1.ManyToOne)(() => Post_1.Post, (post) => post.likes, {
         onDelete: "CASCADE",
     }),
     __metadata("design:type", Post_1.Post)
-], Upvote.prototype, "post", void 0);
-Upvote = __decorate([
+], Like.prototype, "post", void 0);
+Like = __decorate([
     (0, type_graphql_1.ObjectType)(),
     (0, typeorm_1.Entity)()
-], Upvote);
-exports.Upvote = Upvote;
-//# sourceMappingURL=Upvote.js.map
+], Like);
+exports.Like = Like;
+//# sourceMappingURL=Like.js.map

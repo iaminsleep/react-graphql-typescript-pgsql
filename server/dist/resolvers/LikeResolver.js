@@ -12,18 +12,18 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpvoteResolver = void 0;
+exports.LikeResolver = void 0;
 const isAuth_1 = require("../middleware/isAuth");
 const typeorm_data_source_1 = require("../typeorm-data-source");
 const type_graphql_1 = require("type-graphql");
-const Upvote_1 = require("../entities/Upvote");
-class UpvoteResolver {
+const Like_1 = require("../entities/Like");
+class LikeResolver {
     async vote(postId, value, { req }) {
         const isUpvote = value !== -1;
         const realValue = isUpvote ? 1 : -1;
         const { userId } = req.session;
-        const upvote = await Upvote_1.Upvote.findOne({ where: { postId, userId } });
-        if (upvote && upvote.value !== realValue) {
+        const upvote = await Like_1.Like.findOne({ where: { postId, userId } });
+        if (upvote) {
             await typeorm_data_source_1.AppDataSource.transaction(async (transactionManager) => {
                 await transactionManager.query(`
                     update upvote
@@ -62,6 +62,6 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Number, Object]),
     __metadata("design:returntype", Promise)
-], UpvoteResolver.prototype, "vote", null);
-exports.UpvoteResolver = UpvoteResolver;
-//# sourceMappingURL=UpvoteResolver.js.map
+], LikeResolver.prototype, "vote", null);
+exports.LikeResolver = LikeResolver;
+//# sourceMappingURL=LikeResolver.js.map

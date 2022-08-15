@@ -10,8 +10,8 @@
     "dev2": "nodemon --exec ts-node src/index.ts",
     "watch": "tsc -w",
     "migration:create": "typeorm migration:create ./src/migrations/PostgreSQL",
-    "migration:generate": "typeorm migration:generate -d src/typeorm-data-source.ts",
-    "migration:run": "typeorm migration:run -d dist/typeorm-data-source.js",
+    "migration:generate": "npx ts-node ./node_modules/typeorm/cli.js migration:generate ./src/migrations/twitter --dataSource ./src/typeorm-data-source.ts",
+    "migration:run": "npx ts-node ./node_modules/typeorm/cli.js migration:run -d ./src/typeorm-data-source.ts",
     "gen-env": "npx gen-env-types .env -o src/env.d.ts -e ."
   },
   "keywords": [],

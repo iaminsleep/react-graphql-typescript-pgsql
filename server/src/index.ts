@@ -2,6 +2,7 @@ require('dotenv-safe').config({
     allowEmptyValues: true,
     example: './.env.example'
 });
+
 import { 
     COOKIE_NAME, 
     __prod__, 
@@ -15,14 +16,17 @@ import { ApolloServer } from "apollo-server-express"; // For GraphQL
 import { buildSchema } from "type-graphql"; // Typescript GraphQL
 import session from "express-session"; // for Redis
 import Redis from "ioredis"; // Redis
-import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 
 /** Resolvers **/
 import { PostResolver } from "./resolvers/PostResolver";
 import { UserResolver } from "./resolvers/UserResolver";
 import { MyContext } from "./types";
-import { UpvoteResolver } from "./resolvers/UpvoteResolver";
+import { LikeResolver } from "./resolvers/LikeResolver";
 import { createUpvoteLoader, createUserLoader } from "./utils/DataLoader";
+import { AppDataSource } from "./typeorm-data-source";
+import { Post } from "./entities/Post";
+// import { User } from "./entities/User";
+// import { Post } from "./entities/Post";
 
 const main = async() => {
     // Initialize app
@@ -33,6 +37,25 @@ const main = async() => {
     let RedisStore = require("connect-redis")(session)
     let redis = new Redis(); // connect ioredis to redis. original: import { createClient } from "redis"; let redisClient = createClient({ legacyMode: true });
     // redis.connect()
+
+    
+    // to initialize initial connection with the database, register all entities
+    // and "synchronize" database schema, call "initialize()" method of a newly created database
+    // once in your application bootstrap
+    AppDataSource.initialize()
+        .then(async () => {
+            // here you can start to work with your database
+
+            // const entities = AppDataSource.entityMetadatas;
+            // for (const entity of entities) {
+            //     const repository = AppDataSource.getRepository(entity.name);
+            //     await repository.query(`TRUNCATE ${entity.tableName} RESTART IDENTITY CASCADE;`);
+            // }
+            // AppDataSource.runMigrations(); //to run migrations in index.ts
+            Post.delete({});
+            // User.delete({});
+        })
+        .catch((error) => console.log(error))
 
     app.use(
         session({
@@ -49,7 +72,7 @@ const main = async() => {
                 maxAge: 1000 * 60 * 60 * 24, // 1 day
                 httpOnly: true,
                 secure: __prod__, // cookie only works in https
-                sameSite: 'lax', // csrf protection
+                sameSite: __prod__ ? 'lax' : 'none', // csrf protection
             }
         })
     )  //Order matters, so redis session middleware will run before the apollo middleware. (It's important because session middleware will be used inside apollo)
@@ -60,7 +83,7 @@ const main = async() => {
             resolvers: [
                 PostResolver, 
                 UserResolver, 
-                UpvoteResolver
+                LikeResolver
             ],
             validate: false,
         }),
@@ -72,15 +95,13 @@ const main = async() => {
             userLoader: createUserLoader(), 
             upvoteLoader: createUpvoteLoader()
         }), //We can access the entity manager, request and response through context
-        plugins: [
-            ApolloServerPluginLandingPageLocalDefault(),
-        ],
     });
     await server.start();
     
     const corsOptions = {
         origin: [
             process.env.CORS_ORIGIN!,
+            !__prod__ ?? "https://studio.apollographql.com",
         ],
         credentials: true,
     };

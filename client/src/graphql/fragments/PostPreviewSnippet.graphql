@@ -1,13 +1,13 @@
 fragment PostPreviewSnippet on Post {
     id
-    title
     createdAt
     updatedAt
     textSnippet
-    points
+    likes_count
     voteStatus
+    image
     creator {
         id
-        username
+        login
     }
 }

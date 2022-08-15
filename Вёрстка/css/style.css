@@ -413,7 +413,7 @@ button {
 
 .tweet__footer {
 	display: flex;
-	justify-content: end;
+	justify-content: flex-end;
 }
 
 .tweet__like {

@@ -1,5 +1,5 @@
 import DataLoader from "dataloader";
-import { Upvote } from "../entities/Upvote";
+import { Like } from "../entities/Like";
 import { User } from "../entities/User";
 
 // DataLoader helps solving the problem with multiple sql queries. For example, when we fetch creator from post with FieldResolver() it is a separate sql query, and in home page we can have 100+ queries each of them get a single user. It not only merges everything in the same query, but also caches it, which is pretty important.
@@ -26,18 +26,18 @@ new DataLoader<number, User>(async userIds => {
 // keys = [{postId: 5, userId: 10}, {}, {}]
 // return {postId: 5, userId: 10, value: 1} and upvote itself
 export const createUpvoteLoader = () => 
-new DataLoader<{postId: number, userId: number}, Upvote | null>(async (keys) => {
-    const upvotes = await Upvote.findByIds(keys as any);
+new DataLoader<{postId: number, userId: number}, Like | null>(async (keys) => {
+    const likes = await Like.findByIds(keys as any);
 
-    const upvoteIdsToUser: Record<string, Upvote> = {};
+    const likeIdsToUser: Record<string, Like> = {};
 
-    upvotes.forEach(upvote => {
-        upvoteIdsToUser[`${upvote.userId}|${upvote.postId}`] = upvote;
+    likes.forEach(like => {
+        likeIdsToUser[`${like.userId}|${like.postId}`] = like;
     });
 
-    const upvotesArray = keys.map((key) => 
-        upvoteIdsToUser[`${key.userId}|${key.postId}`]
+    const likesArray = keys.map((key) => 
+        likeIdsToUser[`${key.userId}|${key.postId}`]
     );
 
-    return upvotesArray;
+    return likesArray;
 });

@@ -5,7 +5,7 @@ import {
   ManyToOne, OneToMany } from 'typeorm';
 import { ObjectType, Field, Int } from "type-graphql";
 import { User } from './User';
-import { Upvote } from './Upvote';
+import { Like } from './Like';
 
 @ObjectType() // Turn the object into GraphQL object
 @Entity()
@@ -17,15 +17,15 @@ export class Post extends BaseEntity
 
   @Field()
   @Column()
-  title!: string;
-
-  @Field()
-  @Column()
   text!: string;
 
-  @Field()
-  @Column({ type: "int", default: 0 }) // every post starts at 0 upvotes
-  points!: number;
+  @Field(() => Int)
+  @Column({ default: 0 }) // every post starts at 0 upvotes
+  likes_count!: number;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  image: string;
 
   @Field(() => Int, { nullable: true }) // this is only a graphql schema value, there is no column in db
   voteStatus: number | null;
@@ -35,11 +35,13 @@ export class Post extends BaseEntity
   creatorId: number; // allow many to one relationship
 
   @Field()
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, (user) => user.posts, {
+      onDelete: "CASCADE", // if user is deleted it'll delete every post that was created by him
+  })
   creator: User; // create constaint for creatorId
 
-  @OneToMany(() => Upvote, (upvote) => upvote.post)
-  upvotes: Upvote[];
+  @OneToMany(() => Like, (like) => like.post)
+  likes: Like[];
 
   @Field(() => String)
   @CreateDateColumn()

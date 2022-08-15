@@ -43,7 +43,7 @@ export class UserResolver {
     user(
         @Arg('id', () => Int) id: number,
     ) : Promise<User | null> {
-        return User.findOne({where: {id: id}});
+        return User.findOne({ where: { id: id } });
     }
 
     @Query(() => User, { nullable: true })
@@ -74,7 +74,7 @@ export class UserResolver {
         try {
             const result = await AppDataSource.createQueryBuilder().insert().into(User).values({
                 email: options.email,
-                username: options.username,
+                login: options.login.toLowerCase(),
                 password: hashedPassword
             }).returning('*').execute(); // returning * clause to return user object
             user = result.raw[0]; // the whole code here is if you want to use query builder instead of easy User.create({email: options.email,username: options.username,password: hashedPassword}) function
@@ -99,19 +99,19 @@ export class UserResolver {
 
     @Mutation(() => UserResponse)
     async login(
-        @Arg('usernameOrEmail') usernameOrEmail: string,
+        @Arg('loginOrEmail') loginOrEmail: string,
         @Arg('password') password: string,
         @Ctx() { req }: MyContext,
     ): Promise<UserResponse> {
         const user = await User.findOne(
-            usernameOrEmail.includes('@') 
-            ? { where: { email: usernameOrEmail }}
-            :  { where: { username: usernameOrEmail }}
-        ); // conditionally find user either by email or username
+            loginOrEmail.includes('@') 
+            ? { where: { email: loginOrEmail }}
+            :  { where: { login: loginOrEmail }}
+        ); // conditionally find user either by email or login
 
         if(!user) return { 
             errors: [{
-                field: 'usernameOrEmail',
+                field: 'loginOrEmail',
                 message: "That user doesn't exist.",
             }]
         } // error if user was not found by name
@@ -190,17 +190,17 @@ export class UserResolver {
         const key = FORGET_PASSWORD_PREFIX + token;
         const userId = await redis.get(key);
         if(!userId) {
-            return { errors: [{field: "token", message: "Expired token"}]
+            return { errors: [{ field: "token", message: "Expired token" }]
             }
         }
 
         // rare occasion if user was not found in db
         const userIdNum = parseInt(userId);
         const user = await User.findOne(
-            { where: {id: userIdNum }}
+            { where: { id: userIdNum }}
         );
         if(!user) {
-            return { errors: [{field: "token", message: "User no longer exists"}]
+            return { errors: [{ field: "token", message: "User no longer exists" }]
             }
         }
 

@@ -13,7 +13,7 @@ exports.Post = void 0;
 const typeorm_1 = require("typeorm");
 const type_graphql_1 = require("type-graphql");
 const User_1 = require("./User");
-const Upvote_1 = require("./Upvote");
+const Like_1 = require("./Like");
 let Post = class Post extends typeorm_1.BaseEntity {
 };
 __decorate([
@@ -25,17 +25,17 @@ __decorate([
     (0, type_graphql_1.Field)(),
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Post.prototype, "title", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(),
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
 ], Post.prototype, "text", void 0);
 __decorate([
-    (0, type_graphql_1.Field)(),
-    (0, typeorm_1.Column)({ type: "int", default: 0 }),
+    (0, type_graphql_1.Field)(() => type_graphql_1.Int),
+    (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
-], Post.prototype, "points", void 0);
+], Post.prototype, "likes_count", void 0);
+__decorate([
+    (0, type_graphql_1.Field)({ nullable: true }),
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Post.prototype, "image", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => type_graphql_1.Int, { nullable: true }),
     __metadata("design:type", Object)
@@ -47,13 +47,15 @@ __decorate([
 ], Post.prototype, "creatorId", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
-    (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.posts),
+    (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.posts, {
+        onDelete: "CASCADE",
+    }),
     __metadata("design:type", User_1.User)
 ], Post.prototype, "creator", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => Upvote_1.Upvote, (upvote) => upvote.post),
+    (0, typeorm_1.OneToMany)(() => Like_1.Like, (like) => like.post),
     __metadata("design:type", Array)
-], Post.prototype, "upvotes", void 0);
+], Post.prototype, "likes", void 0);
 __decorate([
     (0, type_graphql_1.Field)(() => String),
     (0, typeorm_1.CreateDateColumn)(),
