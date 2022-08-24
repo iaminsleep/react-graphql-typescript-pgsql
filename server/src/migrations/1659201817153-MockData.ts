@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm"
 
-export class MockData1659201817156 implements MigrationInterface {
-    name = 'MockData1659201817156';
+export class MockData1659201817153 implements MigrationInterface {
+    name = 'MockData1659201817153';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         queryRunner.query(`insert into post (text, likes_count, "creatorId") values ('Quisque id justo sit amet sapien dignissim vestibulum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nulla dapibus dolor vel est. Donec odio justo, sollicitudin ut, suscipit a, feugiat et, eros.', 316, 1);

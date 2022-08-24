@@ -42,33 +42,7 @@ const Index = () => {
           {data!.posts.posts.map((post) => // ! exclamation point tells us that data variable is definitely going to have data
           !post ? null : // some posts may be null, so we use this to not show already deleted post, otherwise they throw an error. it is used for invalidating cache
           ( 
-            <>
-            <Tweet post={post}></Tweet>
-            <Flex key={post.id} p={5} shadow="md" borderWidth="1px">
-              <UpvoteSection post={post}/>
-              <Box flex={1}>
-                <NextLink href="/post/[id]" as={`/post/${post.id}`}>
-                  <Link>
-                    <Heading fontSize="xl">
-                      {post.title}
-                    </Heading>
-                  </Link>
-                </NextLink>
-                <Text>posted by {post.creator.username}</Text>
-                <Flex align="center">
-                  <Text flex={1} mt={4}>
-                    {post.textSnippet}...
-                  </Text>
-                  <Box ml="auto">
-                    <PostButtons 
-                      postId={post.id} 
-                      creatorId={post.creator.id}
-                    />
-                  </Box>
-                </Flex>
-              </Box>       
-            </Flex>
-            </>
+            <Tweet key={post.id} post={post}></Tweet>
           ))}
         </ul>    
       )}

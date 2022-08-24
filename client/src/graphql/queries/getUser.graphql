@@ -1,5 +1,5 @@
 query GetUser($id: Int!) {
-    post(id: $id) {
+    user(id: $id) {
         ...RegularUser
     }
 }

@@ -3,6 +3,7 @@ mutation UpdatePost($id: Int!, $image: String, $text: String!) {
         id
         createdAt
         updatedAt
+        image
         text
         textSnippet
     }

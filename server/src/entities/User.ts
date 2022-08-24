@@ -25,11 +25,11 @@ export class User extends BaseEntity
   @Column() // deletion of @Field property makes impossible to select password (for the security matter)
   password!: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   username: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   avatar: string;
 

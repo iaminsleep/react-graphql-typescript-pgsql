@@ -33,7 +33,7 @@ export const UpvoteSection: React.FC<UpvoteSectionProps> = ({ post }) => {
                 aria-label="Upvote" 
                 icon={<ChevronUpIcon w={10} h={10}/>}
             />
-            { post.points }
+            { post.likes_count }
             <IconButton 
                 onClick={async () => {
                     if(post.voteStatus === -1) {

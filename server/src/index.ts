@@ -24,9 +24,10 @@ import { MyContext } from "./types";
 import { LikeResolver } from "./resolvers/LikeResolver";
 import { createUpvoteLoader, createUserLoader } from "./utils/DataLoader";
 import { AppDataSource } from "./typeorm-data-source";
-import { Post } from "./entities/Post";
-// import { User } from "./entities/User";
-// import { Post } from "./entities/Post";
+import { UploadResolver } from "./resolvers/UploadResolver";
+
+import { graphqlUploadExpress } from 'graphql-upload';
+import cors from 'cors';
 
 const main = async() => {
     // Initialize app
@@ -38,21 +39,10 @@ const main = async() => {
     let redis = new Redis(); // connect ioredis to redis. original: import { createClient } from "redis"; let redisClient = createClient({ legacyMode: true });
     // redis.connect()
 
-    
-    // to initialize initial connection with the database, register all entities
-    // and "synchronize" database schema, call "initialize()" method of a newly created database
-    // once in your application bootstrap
     AppDataSource.initialize()
         .then(async () => {
-            // here you can start to work with your database
-
-            // const entities = AppDataSource.entityMetadatas;
-            // for (const entity of entities) {
-            //     const repository = AppDataSource.getRepository(entity.name);
-            //     await repository.query(`TRUNCATE ${entity.tableName} RESTART IDENTITY CASCADE;`);
-            // }
             // AppDataSource.runMigrations(); //to run migrations in index.ts
-            Post.delete({});
+            // Post.delete({});
             // User.delete({});
         })
         .catch((error) => console.log(error))
@@ -76,17 +66,19 @@ const main = async() => {
             }
         })
     )  //Order matters, so redis session middleware will run before the apollo middleware. (It's important because session middleware will be used inside apollo)
-
+    
     // Configure ApolloGraphQL server
     const server = new ApolloServer({
         schema: await buildSchema({
             resolvers: [
                 PostResolver, 
                 UserResolver, 
-                LikeResolver
+                LikeResolver,
+                UploadResolver,
             ],
             validate: false,
         }),
+        csrfPrevention: true,
         cache: 'bounded',
         context: ({ req, res }): MyContext => ({ 
             req, 
@@ -98,6 +90,9 @@ const main = async() => {
     });
     await server.start();
     
+      // This middleware should be added before calling `applyMiddleware`.
+    app.use(graphqlUploadExpress({ maxFileSize: 10000, maxFiles: 10 }));
+  
     const corsOptions = {
         origin: [
             process.env.CORS_ORIGIN!,
@@ -109,6 +104,8 @@ const main = async() => {
         app, 
         cors: corsOptions, 
     });
+
+    app.use(cors());
 
     app.set("trust proxy", __prod__); //If your server is behind a proxy (Heroku, Nginx, Now, etc...)
 

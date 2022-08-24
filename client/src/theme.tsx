@@ -11,6 +11,32 @@ const breakpoints = createBreakpoints({
 })
 
 const theme = extendTheme({
+  components: {
+    Button: {
+      baseStyle: {
+        display: 'block',
+        backgroundColor: 'rgb(26, 145, 218)',
+        padding: '0 15px',
+        borderRadius: '9999px',
+        height: '40px',
+        fontSize: '16px',
+        fontWeight: 700,
+        color: '#ffffff',
+        margin: '0 auto',
+      },
+      variants: {
+        // Make a variant, we'll call it `base` here and leave it empty
+        base: {},
+        secondary: {
+          //...define other variants        
+        }
+      },
+      defaultProps: {
+        // Then here we set the base variant as the default
+        variant: 'base'
+      }
+    },
+  },
   styles: {
     global: () => ({
       body: {

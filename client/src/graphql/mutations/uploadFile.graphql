@@ -1,0 +1,7 @@
+mutation UploadFile($file: FileInput!) {
+    uploadFile(file: $file) {
+        filename
+        mimetype
+        encoding
+    }
+}

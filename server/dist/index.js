@@ -19,7 +19,9 @@ const UserResolver_1 = require("./resolvers/UserResolver");
 const LikeResolver_1 = require("./resolvers/LikeResolver");
 const DataLoader_1 = require("./utils/DataLoader");
 const typeorm_data_source_1 = require("./typeorm-data-source");
-const Post_1 = require("./entities/Post");
+const UploadResolver_1 = require("./resolvers/UploadResolver");
+const graphql_upload_1 = require("graphql-upload");
+const cors_1 = __importDefault(require("cors"));
 const main = async () => {
     var _a;
     const app = (0, express_1.default)();
@@ -28,7 +30,6 @@ const main = async () => {
     let redis = new ioredis_1.default();
     typeorm_data_source_1.AppDataSource.initialize()
         .then(async () => {
-        Post_1.Post.delete({});
     })
         .catch((error) => console.log(error));
     app.use((0, express_session_1.default)({
@@ -53,10 +54,12 @@ const main = async () => {
             resolvers: [
                 PostResolver_1.PostResolver,
                 UserResolver_1.UserResolver,
-                LikeResolver_1.LikeResolver
+                LikeResolver_1.LikeResolver,
+                UploadResolver_1.UploadResolver,
             ],
             validate: false,
         }),
+        csrfPrevention: true,
         cache: 'bounded',
         context: ({ req, res }) => ({
             req,
@@ -67,6 +70,7 @@ const main = async () => {
         }),
     });
     await server.start();
+    app.use((0, graphql_upload_1.graphqlUploadExpress)({ maxFileSize: 10000, maxFiles: 10 }));
     const corsOptions = {
         origin: [
             process.env.CORS_ORIGIN,
@@ -78,6 +82,7 @@ const main = async () => {
         app,
         cors: corsOptions,
     });
+    app.use((0, cors_1.default)());
     app.set("trust proxy", constants_1.__prod__);
     app.listen(port, () => {
         console.log('Server started on localhost:', port);

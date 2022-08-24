@@ -1,6 +1,4 @@
 import { PostPreviewSnippetFragment } from "../generated/graphql";
-import Link from "next/link";
-import { Heading } from "@chakra-ui/react";
 
 interface TweetProps {
     post: PostPreviewSnippetFragment;
@@ -13,17 +11,17 @@ export const Tweet: React.FC<TweetProps> = ({ post }) => {
                 <div className="row">
                     <img
                         className="avatar"
-                        src="images/mary.jpg"
-                        alt="Аватар пользователя Мария"
+                        src={ post.creator.avatar ? "img/avatar.png" : "img/no_avatar.png"}
+                        alt={`${post.creator.login}'s avatar`}
                     />
                     <div className="tweet__wrapper">
                         <header className="tweet__header">
                             <h3 className="tweet-author">
-                                { post.creator.username }
+                                { post.creator.username ?? post.creator.login }
                                 <a
                                     href="#"
                                     className="tweet-author__add tweet-author__nickname"
-                                    >@{ post.creator.username }</a>
+                                    >@{ post.creator.login }</a>
                                 <time
                                     className="tweet-author__add tweet__date"
                                     >11 января</time
@@ -47,7 +45,7 @@ export const Tweet: React.FC<TweetProps> = ({ post }) => {
                     </div>
                 </div>
                 <footer>
-                    <button className="tweet__like">{ post.likes }</button>
+                    <button className="tweet__like">{ post.likes_count }</button>
                 </footer>
             </article>
         </li>

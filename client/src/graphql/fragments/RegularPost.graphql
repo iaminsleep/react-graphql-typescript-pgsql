@@ -2,15 +2,13 @@
 
 fragment RegularPost on Post {
     id
-    createdAt
-    updatedAt
     text
     image
     likes_count
     voteStatus
     creator {
-        id
-        login
-        username
+        ...RegularUser
     }
+    createdAt
+    updatedAt
 }

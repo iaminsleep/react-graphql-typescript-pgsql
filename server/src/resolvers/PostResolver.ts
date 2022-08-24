@@ -138,27 +138,18 @@ export class PostResolver {
     @UseMiddleware(isAuth)
     async updatePost(
         @Arg('id', () => Int) id: number,
-        @Arg('title') title: string, // if you want to make this field nullable
         @Arg('text') text: string,
+        @Arg('image', { nullable: true }) image: string, // if you want to make this field nullable
         @Ctx() { req }: MyContext
     ): Promise<Post | null> {
         const post = await Post.findOne({ where: {id} });
         if(!post) return null;
-        else if(typeof title === 'undefined') return null;
         else if(typeof text === 'undefined') return null;
         else {
-            // post.title = title;
-            // await em.persistAndFlush(post); // save the data in db (MIKROORM equivalent)
-            
-            // const post = Post.update(
-            //     { id, creatorId: req.session.userId }, 
-            //     { title, text }
-            // ) TYPEORM entity equivalent that is not working
-
             const queryResult = await AppDataSource
                 .createQueryBuilder()
                 .update(Post)
-                .set({ text })
+                .set({ text, image })
                 .where('id = :id and "creatorId" = :creatorId', { 
                     id, creatorId: req.session.userId 
                 })

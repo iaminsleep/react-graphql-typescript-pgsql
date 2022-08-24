@@ -23,9 +23,9 @@ export class Post extends BaseEntity
   @Column({ default: 0 }) // every post starts at 0 upvotes
   likes_count!: number;
 
-  @Field({ nullable: true })
-  @Column({ nullable: true })
-  image: string;
+  @Field(() => String, { nullable: true })
+  @Column({ type: "varchar", nullable: true })
+  image: string | null;
 
   @Field(() => Int, { nullable: true }) // this is only a graphql schema value, there is no column in db
   voteStatus: number | null;

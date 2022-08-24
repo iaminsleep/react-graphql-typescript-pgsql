@@ -82,11 +82,9 @@ let PostResolver = class PostResolver {
         const lastId = result[0].max;
         return Post_1.Post.create(Object.assign(Object.assign({ id: lastId + 1 }, input), { creatorId: req.session.userId })).save();
     }
-    async updatePost(id, title, text, { req }) {
+    async updatePost(id, text, image, { req }) {
         const post = await Post_1.Post.findOne({ where: { id } });
         if (!post)
-            return null;
-        else if (typeof title === 'undefined')
             return null;
         else if (typeof text === 'undefined')
             return null;
@@ -94,7 +92,7 @@ let PostResolver = class PostResolver {
             const queryResult = await typeorm_data_source_1.AppDataSource
                 .createQueryBuilder()
                 .update(Post_1.Post)
-                .set({ text })
+                .set({ text, image })
                 .where('id = :id and "creatorId" = :creatorId', {
                 id, creatorId: req.session.userId
             })
@@ -163,8 +161,8 @@ __decorate([
     (0, type_graphql_1.Mutation)(() => Post_1.Post),
     (0, type_graphql_1.UseMiddleware)(isAuth_1.isAuth),
     __param(0, (0, type_graphql_1.Arg)('id', () => type_graphql_1.Int)),
-    __param(1, (0, type_graphql_1.Arg)('title')),
-    __param(2, (0, type_graphql_1.Arg)('text')),
+    __param(1, (0, type_graphql_1.Arg)('text')),
+    __param(2, (0, type_graphql_1.Arg)('image', { nullable: true })),
     __param(3, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, String, String, Object]),
