@@ -37,6 +37,15 @@ let PostResolver = class PostResolver {
     textSnippet(post) {
         return post.text.slice(0, 50);
     }
+    postCreationDateString(post) {
+        return Intl.DateTimeFormat(undefined, {
+            year: "numeric",
+            day: "numeric",
+            month: "long",
+            hour: "numeric",
+            minute: "numeric",
+        }).format(post.createdAt);
+    }
     creator(post, { userLoader }) {
         return userLoader.load(post.creatorId);
     }
@@ -117,6 +126,13 @@ __decorate([
     __metadata("design:paramtypes", [Post_1.Post]),
     __metadata("design:returntype", void 0)
 ], PostResolver.prototype, "textSnippet", null);
+__decorate([
+    (0, type_graphql_1.FieldResolver)(() => String),
+    __param(0, (0, type_graphql_1.Root)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Post_1.Post]),
+    __metadata("design:returntype", void 0)
+], PostResolver.prototype, "postCreationDateString", null);
 __decorate([
     (0, type_graphql_1.FieldResolver)(() => User_1.User),
     __param(0, (0, type_graphql_1.Root)()),

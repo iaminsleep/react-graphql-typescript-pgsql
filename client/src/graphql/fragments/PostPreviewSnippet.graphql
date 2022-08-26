@@ -1,6 +1,7 @@
 fragment PostPreviewSnippet on Post {
     id
     textSnippet
+    postCreationDateString
     likes_count
     voteStatus
     image

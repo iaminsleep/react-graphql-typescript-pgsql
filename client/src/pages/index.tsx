@@ -10,6 +10,7 @@ import { Link } from '@chakra-ui/react';
 import { PostButtons } from '../components/PostButtons';
 import Head from 'next/head';
 import { Tweet } from '../components/Tweet';
+import { AuthModal } from "../components/AuthModal";
 
 const Index = () => {
   const [variables, setVariables] = useState({ 
@@ -19,6 +20,14 @@ const Index = () => {
   const [{data, error, fetching }] = useGetPostsQuery({
     variables,
   });
+
+  const [isModalOpen, setModalOpen] = useState(false);
+  const openModal = () => {
+    setModalOpen(true);
+  }
+  const closeModal = () => {
+      setModalOpen(false);
+  }
   
 
   if(!fetching && !data && !error) {
@@ -30,7 +39,7 @@ const Index = () => {
   }
 
   return (
-    <Layout>
+    <Layout openModal={openModal}>
       <Head>
         <title>Twitter</title>
       </Head>
@@ -40,9 +49,11 @@ const Index = () => {
       ) : (
         <ul className="tweet-list">
           {data!.posts.posts.map((post) => // ! exclamation point tells us that data variable is definitely going to have data
-          !post ? null : // some posts may be null, so we use this to not show already deleted post, otherwise they throw an error. it is used for invalidating cache
+            !post 
+              ? null 
+              : // some posts may be null, so we use this to not show already deleted post, otherwise they throw an error. it is used for invalidating cache
           ( 
-            <Tweet key={post.id} post={post}></Tweet>
+            <Tweet key={post.id} post={post} openModal={openModal}></Tweet>
           ))}
         </ul>    
       )}
@@ -58,6 +69,10 @@ const Index = () => {
           </Button>
         </Flex>
       ) : null}
+      { isModalOpen 
+          ? <AuthModal closeModal={closeModal}></AuthModal>
+          : ''
+      }
     </Layout>
   )
 }

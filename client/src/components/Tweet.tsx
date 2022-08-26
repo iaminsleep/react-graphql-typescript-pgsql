@@ -1,10 +1,15 @@
-import { PostPreviewSnippetFragment } from "../generated/graphql";
+import { PostPreviewSnippetFragment, useMeQuery, useVoteMutation } from "../generated/graphql";
+import { PostButtons } from "./PostButtons";
 
 interface TweetProps {
+    openModal: Function,
     post: PostPreviewSnippetFragment;
 }
 
-export const Tweet: React.FC<TweetProps> = ({ post }) => {
+export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
+    const [{ data: authUserData }] = useMeQuery();
+    const [, vote] = useVoteMutation();
+
     return (
         <li>
             <article className="tweet">
@@ -16,20 +21,19 @@ export const Tweet: React.FC<TweetProps> = ({ post }) => {
                     />
                     <div className="tweet__wrapper">
                         <header className="tweet__header">
-                            <h3 className="tweet-author">
-                                { post.creator.username ?? post.creator.login }
+                            <div className="tweet_div">
+                                <h3 className="tweet-author">
+                                    { post.creator.username ?? post.creator.login }
+                                </h3>
                                 <a
                                     href="#"
                                     className="tweet-author__add tweet-author__nickname"
-                                    >@{ post.creator.login }</a>
-                                <time
-                                    className="tweet-author__add tweet__date"
-                                    >11 января</time
-                                >
-                            </h3>
-                            <button
-                                className="tweet__delete-button chest-icon"
-                            ></button>
+                                    >@{ post.creator.login }
+                                </a>
+                            </div>
+                            { authUserData?.me?.id === post.creator.id && 
+                                <PostButtons postId={post.id}/>
+                            }
                         </header>
                         <div className="tweet-post">
                             <p className="tweet-post__text">
@@ -38,14 +42,24 @@ export const Tweet: React.FC<TweetProps> = ({ post }) => {
                             <figure className="tweet-post__image">
                                 <img
                                     src="https://picsum.photos/400/300?random=1"
-                                    alt="Сообщение Марии Lorem ipsum dolor sit amet, consectetur."
                                 />
                             </figure>
+                            <time className="tweet-author__add tweet__date">
+                                { post.postCreationDateString }
+                            </time>
                         </div>
                     </div>
                 </div>
                 <footer>
-                    <button className="tweet__like">{ post.likes_count }</button>
+                    <button 
+                        onClick={ 
+                            authUserData?.me 
+                            ? async () => vote({value: 1, postId: post.id})
+                            : () => openModal()
+                        } 
+                    className="tweet__like">
+                        { post.likes_count }
+                    </button>
                 </footer>
             </article>
         </li>

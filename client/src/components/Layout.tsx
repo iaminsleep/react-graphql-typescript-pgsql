@@ -2,19 +2,17 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 import { useMeQuery } from "../generated/graphql";
 import { isServer } from "../utils/isServer";
-import { AuthModal } from "./AuthModal";
 import { Header } from "./Header"
 import { NavBar } from "./NavBar";
 import { TweetForm } from "./TweetForm";
 import { Wrapper } from "./Wrapper"
 
 interface LayoutProps {
+    openModal: Function,
     children: any,
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
-    const [isModalOpen, setModalOpen] = useState(false);
-
+export const Layout: React.FC<LayoutProps> = ({ openModal, children }) => {
     const [isServerRendered, setIsServerRendered] = useState(false);
     useEffect(() => {
         if(isServer()) {
@@ -24,13 +22,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     const [{ data, fetching }] = useMeQuery({
         pause: isServerRendered, // if you don't want to run query on the server
     }); // so, the logout mutation cache update in _app.tsx makes it very convinient to delete username from everywhere, because MeQuery reusult will be equal to null
-
-    const openModal = () => {
-        setModalOpen(true);
-    }
-    const closeModal = () => {
-        setModalOpen(false);
-    }
 
     return (
         <>
@@ -47,10 +38,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </Wrapper>
                 </main>
             </div>
-            { isModalOpen 
-                ? <AuthModal closeModal={closeModal}></AuthModal>
-                : ''
-            }
         </>
     );
 }

@@ -9,6 +9,7 @@ fragment RegularPost on Post {
     creator {
         ...RegularUser
     }
+    postCreationDateString
     createdAt
     updatedAt
 }

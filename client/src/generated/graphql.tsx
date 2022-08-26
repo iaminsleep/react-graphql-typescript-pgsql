@@ -111,6 +111,7 @@ export type Post = {
   id: Scalars['Float'];
   image?: Maybe<Scalars['String']>;
   likes_count: Scalars['Int'];
+  postCreationDateString: Scalars['String'];
   text: Scalars['String'];
   textSnippet: Scalars['String'];
   updatedAt: Scalars['String'];
@@ -169,11 +170,11 @@ export type UsernamePasswordInput = {
   password: Scalars['String'];
 };
 
-export type PostPreviewSnippetFragment = { __typename?: 'Post', id: number, textSnippet: string, likes_count: number, voteStatus?: number | null, image?: string | null, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } };
+export type PostPreviewSnippetFragment = { __typename?: 'Post', id: number, textSnippet: string, postCreationDateString: string, likes_count: number, voteStatus?: number | null, image?: string | null, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } };
 
 export type RegularErrorFragment = { __typename?: 'FieldError', field: string, message: string };
 
-export type RegularPostFragment = { __typename?: 'Post', id: number, text: string, image?: string | null, likes_count: number, voteStatus?: number | null, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } };
+export type RegularPostFragment = { __typename?: 'Post', id: number, text: string, image?: string | null, likes_count: number, voteStatus?: number | null, postCreationDateString: string, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } };
 
 export type RegularUserFragment = { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null };
 
@@ -257,7 +258,7 @@ export type GetPostQueryVariables = Exact<{
 }>;
 
 
-export type GetPostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, text: string, image?: string | null, likes_count: number, voteStatus?: number | null, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } } | null };
+export type GetPostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, text: string, image?: string | null, likes_count: number, voteStatus?: number | null, postCreationDateString: string, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } } | null };
 
 export type GetPostsQueryVariables = Exact<{
   limit: Scalars['Int'];
@@ -265,7 +266,7 @@ export type GetPostsQueryVariables = Exact<{
 }>;
 
 
-export type GetPostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', id: number, textSnippet: string, likes_count: number, voteStatus?: number | null, image?: string | null, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } }> } };
+export type GetPostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', id: number, textSnippet: string, postCreationDateString: string, likes_count: number, voteStatus?: number | null, image?: string | null, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } }> } };
 
 export type GetUserQueryVariables = Exact<{
   id: Scalars['Int'];
@@ -291,6 +292,7 @@ export const PostPreviewSnippetFragmentDoc = gql`
     fragment PostPreviewSnippet on Post {
   id
   textSnippet
+  postCreationDateString
   likes_count
   voteStatus
   image
@@ -311,6 +313,7 @@ export const RegularPostFragmentDoc = gql`
   creator {
     ...RegularUser
   }
+  postCreationDateString
   createdAt
   updatedAt
 }

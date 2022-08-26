@@ -23,6 +23,16 @@ export class PostResolver {
     textSnippet(@Root() post: Post) {
         return post.text.slice(0, 50);
     }
+    @FieldResolver(() => String)
+    postCreationDateString(@Root() post: Post) {
+        return Intl.DateTimeFormat(undefined, {
+            year: "numeric",
+            day: "numeric",
+            month: "long",
+            hour: "numeric",
+            minute: "numeric",
+        }).format(post.createdAt);
+    }
 
     @FieldResolver(() => User)
     creator(
@@ -80,25 +90,6 @@ export class PostResolver {
             order by p."createdAt" DESC
             limit $1
         `, replacements); // $1 means it will be first replacement. vote status changes only if user is authorized
-
-        /** queryBuilder analogue */
-        // const queryBuilder = AppDataSource
-        //     .getRepository(Post)
-        //     .createQueryBuilder("pagination")
-        //     .innerJoinAndSelect(
-        //         "post.creator",
-        //         "user", 'user.id = post."creatorId"',
-        //     )
-        //     .orderBy('post."createdAt"', "DESC") // specific for typeorm and postgresql - wrap single quotes around double quotes if you want to use camelCase, otherwise "createdAt" will look like 'createdat'
-        //     .take(limitPaginationNumber)
-
-        // if(cursor) {
-        //     queryBuilder.where('post."createdAt" < :cursor', { 
-        //         cursor: new Date(parseInt(cursor)),
-        //     }); // query builder allows using if statements and continue querying
-        // }
-
-        // const posts = await queryBuilder.getMany();
 
         return { 
             posts: posts.slice(0, realLimit),
