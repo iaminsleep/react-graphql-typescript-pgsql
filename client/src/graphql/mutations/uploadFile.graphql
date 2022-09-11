@@ -1,4 +1,4 @@
-mutation UploadFile($file: FileInput!) {
+mutation UploadFile($file: Upload!) {
     uploadFile(file: $file) {
         filename
         mimetype

@@ -46,17 +46,8 @@ __decorate([
 FileResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], FileResponse);
-let FileInput = class FileInput {
-};
-__decorate([
-    (0, type_graphql_1.Field)(() => graphql_upload_1.GraphQLUpload),
-    __metadata("design:type", Object)
-], FileInput.prototype, "file", void 0);
-FileInput = __decorate([
-    (0, type_graphql_1.InputType)()
-], FileInput);
 let UploadResolver = class UploadResolver {
-    async uploadFile({ file }) {
+    async uploadFile(file) {
         const { createReadStream, filename, mimetype, encoding } = file;
         const { ext } = path_1.default.parse(filename);
         const randomName = generateRandomString(12) + ext;
@@ -70,9 +61,9 @@ let UploadResolver = class UploadResolver {
 };
 __decorate([
     (0, type_graphql_1.Mutation)(() => FileResponse),
-    __param(0, (0, type_graphql_1.Arg)('file', () => FileInput)),
+    __param(0, (0, type_graphql_1.Arg)('file', () => graphql_upload_1.GraphQLUpload)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [FileInput]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UploadResolver.prototype, "uploadFile", null);
 UploadResolver = __decorate([

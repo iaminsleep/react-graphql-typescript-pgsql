@@ -22,10 +22,6 @@ export type FieldError = {
   message: Scalars['String'];
 };
 
-export type FileInput = {
-  file: Scalars['Upload'];
-};
-
 export type FileResponse = {
   __typename?: 'FileResponse';
   encoding: Scalars['String'];
@@ -88,7 +84,7 @@ export type MutationUpdatePostArgs = {
 
 
 export type MutationUploadFileArgs = {
-  file: FileInput;
+  file: Scalars['Upload'];
 };
 
 
@@ -119,7 +115,6 @@ export type Post = {
 };
 
 export type PostInput = {
-  image?: InputMaybe<Scalars['String']>;
   text: Scalars['String'];
 };
 
@@ -140,6 +135,7 @@ export type QueryPostArgs = {
 export type QueryPostsArgs = {
   cursor?: InputMaybe<Scalars['String']>;
   limit: Scalars['Int'];
+  orderBy?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -239,7 +235,7 @@ export type UpdatePostMutationVariables = Exact<{
 export type UpdatePostMutation = { __typename?: 'Mutation', updatePost: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, image?: string | null, text: string, textSnippet: string } };
 
 export type UploadFileMutationVariables = Exact<{
-  file: FileInput;
+  file: Scalars['Upload'];
 }>;
 
 
@@ -263,6 +259,7 @@ export type GetPostQuery = { __typename?: 'Query', post?: { __typename?: 'Post',
 export type GetPostsQueryVariables = Exact<{
   limit: Scalars['Int'];
   cursor?: InputMaybe<Scalars['String']>;
+  orderBy?: InputMaybe<Scalars['String']>;
 }>;
 
 
@@ -428,7 +425,7 @@ export function useUpdatePostMutation() {
   return Urql.useMutation<UpdatePostMutation, UpdatePostMutationVariables>(UpdatePostDocument);
 };
 export const UploadFileDocument = gql`
-    mutation UploadFile($file: FileInput!) {
+    mutation UploadFile($file: Upload!) {
   uploadFile(file: $file) {
     filename
     mimetype
@@ -461,8 +458,8 @@ export function useGetPostQuery(options: Omit<Urql.UseQueryArgs<GetPostQueryVari
   return Urql.useQuery<GetPostQuery>({ query: GetPostDocument, ...options });
 };
 export const GetPostsDocument = gql`
-    query GetPosts($limit: Int!, $cursor: String) {
-  posts(limit: $limit, cursor: $cursor) {
+    query GetPosts($limit: Int!, $cursor: String, $orderBy: String) {
+  posts(limit: $limit, cursor: $cursor, orderBy: $orderBy) {
     posts {
       ...PostPreviewSnippet
     }

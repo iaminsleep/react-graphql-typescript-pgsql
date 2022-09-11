@@ -1,47 +1,89 @@
-import { MeQuery, useUploadFileMutation } from '../generated/graphql';
+import { Button, FormControl } from '@chakra-ui/react';
+import { Form, Formik, useField } from 'formik';
+import { useRouter } from 'next/router';
+import { MeQuery, useCreatePostMutation, useUploadFileMutation } from '../generated/graphql';
+import { TextareaInput } from './TextareaInput';
 
 interface TweetFormProps {
     authUserData?: MeQuery
 }
 
 export const TweetForm: React.FC<TweetFormProps> = ({ authUserData }) => {
+    const router = useRouter();
+
+    const [, createPost] = useCreatePostMutation();
     const [, uploadFile] = useUploadFileMutation();
 
     const handleFileChange = (e: React.ChangeEvent<any>) => {
         const file = e.target.files[0];
+        console.log(file);
         if(!file) return false;
         uploadFile({ file: file });
     }
 
+    // type FileProps = { 
+    //     type: string;
+    //     name: string;
+    //     value: File
+    // }
+
+    // const FileInput: React.FC<FileProps> = ({ ...props }) => {
+    //     const [field] = useField(props);
+    //     return (
+    //         <>
+    //             <input
+    //                 { ...field}
+    //                 {...props}
+    //                 id={field.name}
+    //                 onChange={handleFileChange}
+    //             />
+    //         </>
+    //     );
+    // };
+
     return(
-        <>
-            <section className="wrapper">
-                <form className="tweet-form">
+        <section className="wrapper">
+            <Formik
+                initialValues={{ text: "" }}
+                onSubmit={async (values, { resetForm }) => {
+                    const {error} = await createPost(
+                        { input: values }
+                    );
+                    resetForm({});
+                    if(!error) router.push('/');
+                }}
+            >
+            {({ isSubmitting }) => (
+                <Form className="tweet-form">
                     <div className="tweet-form__wrapper">
                         <img
                             className="avatar"
-                            src={authUserData?.me ? "/img/avatar.png" : "img/no_avatar.png"}
+                            src={ authUserData?.me 
+                                ? "/img/avatar.png" 
+                                : "img/no_avatar.png"
+                            }
                             alt="Avatar"
                         />
-                        <textarea
+                        <TextareaInput
                             className="tweet-form__text"
+                            name="text"
                             rows={Number("4")}
-                            placeholder="Что происходит?"
+                            placeholder="What is happening?"
                             required
-                        ></textarea>
+                        />
                     </div>
                     <div className="tweet-form__btns">
-                        <button
-                            className="tweet-img__btn"
-                            type="button"
-                        ></button>
-                        <input type="file" onChange={handleFileChange}/>
-                        <button className="tweet-form__btn" type="submit">
-                            Твитнуть
-                        </button>
+                        <Button 
+                            isLoading={ isSubmitting } 
+                            className="tweet-form__btn" 
+                            type="submit"
+                        >
+                            Tweet
+                        </Button>
                     </div>
-                </form>
-            </section>
-        </>
+                </Form>
+            )}
+            </Formik>
+        </section>
     );
 }

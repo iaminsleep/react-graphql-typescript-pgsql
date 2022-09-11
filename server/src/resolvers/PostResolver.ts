@@ -1,6 +1,5 @@
 import { Post } from "../entities/Post";
 import { Arg, Ctx, Field, FieldResolver, Int, Mutation, ObjectType, Query, Resolver, Root, UseMiddleware } from "type-graphql";
-import { sleep } from "../utils/sleep";
 import { MyContext } from "../types";
 import { isAuth } from "../middleware/isAuth";
 import { PostInput } from "../utils/PostInput";
@@ -66,8 +65,9 @@ export class PostResolver {
     async posts(
         @Arg('limit', () => Int) limit: number, // limit of posts
         @Arg('cursor', () => String, { nullable: true}) cursor: string | null,
+        @Arg('orderBy', () => String, { nullable: true}) orderBy: string | null,
     ): Promise<PaginatedPosts> {
-        await sleep(3000); // keep for fun, impacts delete post speed
+        // await sleep(3000); // keep for fun, impacts delete post speed
         // return Post.find(); // returns Promise of ALL posts - completion of asynchronous operation.
 
         // 100 -> 101 make the query take 1 more post than usual to check if there are posts left
@@ -87,7 +87,7 @@ export class PostResolver {
                 ? 'where p."createdAt" < $2'
                 : ''
             }
-            order by p."createdAt" DESC
+            ${orderBy === "LIKES_COUNT" ? 'order by p.likes_count DESC' : 'order by p."createdAt" DESC'}
             limit $1
         `, replacements); // $1 means it will be first replacement. vote status changes only if user is authorized
 

@@ -1,5 +1,5 @@
-query GetPosts($limit: Int!, $cursor: String) {
-    posts(limit: $limit, cursor: $cursor) {
+query GetPosts($limit: Int!, $cursor: String, $orderBy: String) {
+    posts(limit: $limit, cursor: $cursor, orderBy: $orderBy) {
         posts {
             ...PostPreviewSnippet
         }

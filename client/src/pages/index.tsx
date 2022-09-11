@@ -1,20 +1,23 @@
 import { withUrqlClient } from 'next-urql';
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { useGetPostsQuery } from "../generated/graphql";
-import { Box, Button, Flex, Heading, Stack, Text } from "@chakra-ui/react";
+import { Button, Flex } from "@chakra-ui/react";
 import { Layout } from "../components/Layout";
-import { useState } from 'react';
-import NextLink from 'next/link';
-import { UpvoteSection } from '../components/UpvoteSection';
-import { Link } from '@chakra-ui/react';
-import { PostButtons } from '../components/PostButtons';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { Tweet } from '../components/Tweet';
 import { AuthModal } from "../components/AuthModal";
+import { useMeQuery } from "../generated/graphql";
+import { TweetForm } from "../components/TweetForm";
+import { isServer } from "../utils/isServer";
+import { useRouter } from 'next/router'
 
 const Index = () => {
+  const router = useRouter();
+  const { orderBy } = router.query;
+
   const [variables, setVariables] = useState({ 
-    limit: 15, cursor: null as null | string 
+    limit: 15, cursor: null as null | string, orderBy: orderBy as string | null
   });
 
   const [{data, error, fetching }] = useGetPostsQuery({
@@ -28,6 +31,17 @@ const Index = () => {
   const closeModal = () => {
       setModalOpen(false);
   }
+
+  const [isServerRendered, setIsServerRendered] = useState(false);
+  useEffect(() => {
+      if(isServer()) {
+          setIsServerRendered(true);
+      }
+  })
+
+  const [ meData ] = useMeQuery({
+      pause: isServerRendered, // if you don't want to run query on the server
+  }); // so, the logout mutation cache update in _app.tsx makes it very convinient to delete username from everywhere, because MeQuery reusult will be equal to null
   
 
   if(!fetching && !data && !error) {
@@ -43,6 +57,10 @@ const Index = () => {
       <Head>
         <title>Twitter</title>
       </Head>
+      { meData?.data?.me
+          ? <TweetForm authUserData={data}/>
+          : null
+      }
       {/* if data is true, the posts are going to show. */}
       {!data && fetching ? (
         <div>Loading...</div>
@@ -63,6 +81,7 @@ const Index = () => {
             { 
               limit: variables.limit, 
               cursor: data.posts.posts[data.posts.posts.length - 1].createdAt,
+              orderBy: orderBy as string | null
             })
           }} isLoading={fetching} m="auto" my={8}>
             Load more

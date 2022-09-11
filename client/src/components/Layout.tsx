@@ -4,7 +4,6 @@ import { useMeQuery } from "../generated/graphql";
 import { isServer } from "../utils/isServer";
 import { Header } from "./Header"
 import { NavBar } from "./NavBar";
-import { TweetForm } from "./TweetForm";
 import { Wrapper } from "./Wrapper"
 
 interface LayoutProps {
@@ -31,8 +30,7 @@ export const Layout: React.FC<LayoutProps> = ({ openModal, children }) => {
             <div className="container row">
                 <Header openModal={openModal} authUserData={data}></Header>
                 <main className="main">
-                    <NavBar/>
-                    <TweetForm authUserData={data}/>
+                    <NavBar isAuth={data?.me !== null} openAuthModal={openModal}/>
                     <Wrapper>
                         { children }
                     </Wrapper>

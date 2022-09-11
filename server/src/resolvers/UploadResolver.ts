@@ -1,7 +1,7 @@
 import { FileUpload, GraphQLUpload } from 'graphql-upload';
 import path from 'path';
 import { finished } from 'stream/promises';
-import { Arg, Field, InputType, Mutation, ObjectType, Resolver } from 'type-graphql';
+import { Arg, Field, Mutation, ObjectType, Resolver } from 'type-graphql';
 
 function generateRandomString(length: number) {
     var result = '';
@@ -25,17 +25,11 @@ class FileResponse {
     encoding!: string;
 }
 
-@InputType()
-class FileInput {
-    @Field(() => GraphQLUpload)
-    file: FileUpload
-}
-
 @Resolver()
 export class UploadResolver {
     @Mutation(() => FileResponse)
     async uploadFile(
-        @Arg('file', () => FileInput) { file }: FileInput,
+        @Arg('file', () => GraphQLUpload) file: FileUpload,
     ): Promise<FileResponse> {
         const { createReadStream, filename, mimetype, encoding } = file;
 

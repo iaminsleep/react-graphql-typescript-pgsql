@@ -46,7 +46,7 @@ const main = async () => {
             maxAge: 1000 * 60 * 60 * 24,
             httpOnly: true,
             secure: constants_1.__prod__,
-            sameSite: constants_1.__prod__ ? 'lax' : 'none',
+            sameSite: 'lax',
         }
     }));
     const server = new apollo_server_express_1.ApolloServer({

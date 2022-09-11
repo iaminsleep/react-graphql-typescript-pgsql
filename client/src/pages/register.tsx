@@ -4,73 +4,99 @@ import * as React from 'react';
 
 import { Formik, Form } from 'formik';
 import { Box, Button } from '@chakra-ui/react';
-import { Wrapper } from '../components/Wrapper';
 import { InputField } from '../components/InputField';
+import { Layout } from "../components/Layout";
 
 import { useRegisterMutation } from '../generated/graphql';
 import { toErrorMap } from '../utils/toErrorMap';
 import { useRouter } from 'next/router';
 import { withUrqlClient } from 'next-urql';
 import { createUrqlClient } from '../utils/createUrqlClient';
+import Head from 'next/head';
+import { AuthModal } from '../components/AuthModal';
 
 interface RegisterProps {}
 
 const Register: React.FC<RegisterProps> = ({}) => {
     const router = useRouter();
     const [, register] = useRegisterMutation();
+
+    const [isModalOpen, setModalOpen] = React.useState(false);
+    const openModal = () => {
+        setModalOpen(true);
+    }
+    const closeModal = () => {
+        setModalOpen(false);
+    }
+
     return (
-        <Wrapper variant="regular">
-            <Formik
-                initialValues={
-                    { email: "", username: "", password: "" }
-                }
-                onSubmit={async (values, { setErrors }) => {
-                    const response = await register({
-                        options: values
-                    }); // onSubmitting variable doesn't change because promise is not returned. That's why it is infinitely spinning, so adding 'return' before function name solves the issue
-                    if(response.data?.register.errors) // optional chaining allows to access deep nested properties 
-                    {
-                        setErrors(toErrorMap(response.data.register.errors));
-                    } else if(response.data?.register.user) {
-                        // worked
-                        router.push('/');
+        <Layout openModal={openModal}>
+            <Head>
+                <title>Twitter</title>
+            </Head>
+            <div className="paddingeighty">
+                <h2 className="tweet-form__title">Welcome to Twitter</h2>
+                <div className="tweet-form__subtitle">
+                    If you are already registered,&nbsp;
+                    <button className="white" onClick={() => {
+                        openModal();
+                    }}>login</button>
+                </div>
+                <Formik
+                    initialValues={
+                        { email: "", login: "", password: "" }
                     }
-                }}
-            >
-                {({ isSubmitting }) => (
-                    <Form>
-                        <InputField
-                            name="email"
-                            placeholder="email"
-                            label="Email"
-                        />
-                        <Box mt={4}>
-                        <InputField
-                                name="username"
-                                placeholder="username"
-                                label="Username"
-                        />
-                        </Box>
-                        <Box mt={4}>
-                        <InputField
+                    onSubmit={async (values, { setErrors }) => {
+                        const response = await register({
+                            options: values
+                        }); // onSubmitting variable doesn't change because promise is not returned. That's why it is infinitely spinning, so adding 'return' before function name solves the issue
+                        if(response.data?.register.errors) // optional chaining allows to access deep nested properties 
+                        {
+                            setErrors(toErrorMap(response.data.register.errors));
+                        } else if(response.data?.register.user) {
+                            // worked
+                            router.push('/');
+                        }
+                    }}
+                >
+                    {({ isSubmitting }) => (
+                        <Form>
+                            <InputField
+                                name="email"
+                                placeholder="email"
+                                className="tweet-form__input"
+                            />
+                            <Box mt={4}>
+                            <InputField
+                                name="login"
+                                placeholder="login"
+                                className="tweet-form__input"
+                            />
+                            </Box>
+                            <Box mt={4}>
+                            <InputField
                                 name="password"
                                 placeholder="password"
-                                label="Password"
                                 type="password"
-                        />
-                        </Box>
-                        <Button
-                            mt={4}
-                            type="submit"
-                            isLoading={ isSubmitting }
-                            color="white"
-                            backgroundColor="teal"
-                        >Register
-                        </Button>
-                    </Form>
-                )}
-            </Formik>
-        </Wrapper>
+                                className="tweet-form__input"
+                            />
+                            </Box>
+                            <Button
+                                mt={4}
+                                type="submit"
+                                isLoading={ isSubmitting }
+                                className="tweet-form__btn_center"
+                            >Register
+                            </Button>
+                        </Form>
+                    )}
+                </Formik>
+                { isModalOpen 
+                    ? <AuthModal closeModal={closeModal}></AuthModal>
+                    : ''
+                }
+            </div>
+        </Layout>
     );
 };
 

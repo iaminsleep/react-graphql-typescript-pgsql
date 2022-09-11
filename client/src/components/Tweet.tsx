@@ -39,11 +39,11 @@ export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
                             <p className="tweet-post__text">
                                 { post.textSnippet }
                             </p>
-                            <figure className="tweet-post__image">
+                            {/* <figure className="tweet-post__image">
                                 <img
-                                    src="https://picsum.photos/400/300?random=1"
+                                    src="https://chudo-prirody.com/uploads/posts/2021-08/1628921960_133-p-foto-milikh-kotyat-i-shchenyat-144.jpg"
                                 />
-                            </figure>
+                            </figure> */}
                             <time className="tweet-author__add tweet__date">
                                 { post.postCreationDateString }
                             </time>

@@ -118,6 +118,14 @@ button {
 	cursor: pointer;
 }
 
+.white {
+	color: white;
+}
+
+.paddingeighty {
+	padding: 80px;
+}
+
 .row {
 	display: flex;
 }
@@ -143,6 +151,7 @@ button {
 
 .header__link:hover {
 	background-color: rgba(29, 161, 242, 0.1);
+	cursor: pointer;
 }
 
 .header__link_current {
@@ -400,7 +409,7 @@ button {
 	white-space: pre-wrap;
 	font-size: 16px;
 	line-height: 1.35;
-	padding: 10px 0;
+	padding: 20px 0;
 }
 
 .tweet-post__image {

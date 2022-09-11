@@ -22,7 +22,6 @@ const theme = extendTheme({
         fontSize: '16px',
         fontWeight: 700,
         color: '#ffffff',
-        margin: '0 auto',
       },
       variants: {
         // Make a variant, we'll call it `base` here and leave it empty

@@ -81,8 +81,8 @@ class UserResolver {
             if (err.code === '23505')
                 return {
                     errors: [{
-                            field: 'username',
-                            message: 'This username or email has already been taken.'
+                            field: 'login',
+                            message: 'This login or email has already been taken.'
                         }]
                 };
         }

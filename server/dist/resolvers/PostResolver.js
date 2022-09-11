@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostResolver = void 0;
 const Post_1 = require("../entities/Post");
 const type_graphql_1 = require("type-graphql");
-const sleep_1 = require("../utils/sleep");
 const isAuth_1 = require("../middleware/isAuth");
 const PostInput_1 = require("../utils/PostInput");
 const typeorm_data_source_1 = require("../typeorm-data-source");
@@ -58,8 +57,7 @@ let PostResolver = class PostResolver {
         });
         return upvote;
     }
-    async posts(limit, cursor) {
-        await (0, sleep_1.sleep)(3000);
+    async posts(limit, cursor, orderBy) {
         const realLimit = Math.min(50, limit);
         const limitPaginationNumber = realLimit + 1;
         const replacements = [limitPaginationNumber];
@@ -72,7 +70,7 @@ let PostResolver = class PostResolver {
             ${cursor
             ? 'where p."createdAt" < $2'
             : ''}
-            order by p."createdAt" DESC
+            ${orderBy === "LIKES_COUNT" ? 'order by p.likes_count DESC' : 'order by p."createdAt" DESC'}
             limit $1
         `, replacements);
         return {
@@ -153,8 +151,9 @@ __decorate([
     (0, type_graphql_1.Query)(() => PaginatedPosts),
     __param(0, (0, type_graphql_1.Arg)('limit', () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Arg)('cursor', () => String, { nullable: true })),
+    __param(2, (0, type_graphql_1.Arg)('orderBy', () => String, { nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, Object, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "posts", null);
 __decorate([

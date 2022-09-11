@@ -41,6 +41,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ closeModal }) => {
                                     router.push(router.query.next); // if next path is set in router query
                                 } else {            
                                     router.push('/');
+                                    closeModal();
                                 }
                             }
                         }

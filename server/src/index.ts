@@ -62,7 +62,7 @@ const main = async() => {
                 maxAge: 1000 * 60 * 60 * 24, // 1 day
                 httpOnly: true,
                 secure: __prod__, // cookie only works in https
-                sameSite: __prod__ ? 'lax' : 'none', // csrf protection
+                sameSite: 'lax', // 'none'
             }
         })
     )  //Order matters, so redis session middleware will run before the apollo middleware. (It's important because session middleware will be used inside apollo)
