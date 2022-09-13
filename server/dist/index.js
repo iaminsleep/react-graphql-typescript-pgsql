@@ -66,7 +66,7 @@ const main = async () => {
             res,
             redis,
             userLoader: (0, DataLoader_1.createUserLoader)(),
-            upvoteLoader: (0, DataLoader_1.createUpvoteLoader)()
+            likeLoader: (0, DataLoader_1.createLikeLoader)()
         }),
     });
     await server.start();

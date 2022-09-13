@@ -1,6 +1,6 @@
 import { cacheExchange, Resolver, Cache } from "@urql/exchange-graphcache";
 import { dedupExchange, Exchange, fetchExchange, stringifyVariables } from "urql";
-import { DeletePostMutationVariables, LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation, VoteMutationVariables } from "../generated/graphql";
+import { DeletePostMutationVariables, LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation, LikeMutationVariables } from "../generated/graphql";
 import { betterUpdateQuery } from './betterUpdateQuery';
 import { pipe, tap } from 'wonka';
 import Router from "next/router";
@@ -114,31 +114,40 @@ export const createUrqlClient = (ssrExchange: any, ctx: any): any => {
                             id: (args as DeletePostMutationVariables).id,
                         })
                     },
-                    vote: (_result, args, cache, info) => {
+                    like: (_result, args, cache, info) => {
                         /** this is an alternative method to update data without reloading. in this case, we're not updating the cache, we change values iniside the graphql cache */
-                        const { postId, value } = args as VoteMutationVariables;
+                        const { postId } = args as LikeMutationVariables;
                         const data = cache.readFragment(
                             gql `
                                 fragment respData on Post {
                                     id
-                                    points
+                                    likes_count
                                     voteStatus
                                 }
                             `, { id: postId } as any
                         ); // read the graphql fragment
                         if(data) {
-                            if(data.voteStatus === value) {
-                                return;
+                            if(data.voteStatus === 0) {
+                                const newPoints = (data.likes_count as number) + 1;
+                                cache.writeFragment(
+                                    gql `
+                                        fragment rewrCache on Post {
+                                            likes_count
+                                            voteStatus
+                                        }
+                                    `, { id: postId, likes_count: newPoints, voteStatus: 1 } as any
+                                ); // update graphql fragment
+                            } else if(data.voteStatus === 1) {
+                                const newPoints = (data.likes_count as number) - 1;
+                                cache.writeFragment(
+                                    gql `
+                                        fragment rewrCache on Post {
+                                            likes_count
+                                            voteStatus
+                                        }
+                                    `, { id: postId, likes_count: newPoints, voteStatus: 0 } as any
+                                );
                             }
-                            const newPoints = (data.points as number) + (!data.voteStatus? 1 : 2) * value;
-                            cache.writeFragment(
-                                gql `
-                                    fragment rewrCache on Post {
-                                        points
-                                        voteStatus
-                                    }
-                                `, { id: postId, points: newPoints, voteStatus: value } as any
-                            ); // update graphql fragment
                         }
                     },
                     createPost: (_result, args, cache, info) => {

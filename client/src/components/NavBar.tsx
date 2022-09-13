@@ -9,7 +9,7 @@ interface NavBarProps {
 
 export const NavBar: React.FC<NavBarProps> = ({ isAuth, openAuthModal }) => {
     const router = useRouter()
-    const { orderBy } = router.query;
+    const { searchBy } = router.query;
 
     return(
         <>
@@ -23,16 +23,22 @@ export const NavBar: React.FC<NavBarProps> = ({ isAuth, openAuthModal }) => {
                                 <NextLink href="/profile">
                                     <a className="header__link header__link_profile" title="Profile"/>
                                 </NextLink>
-                                <NextLink href="/">
-                                    <a className="header__link header__link_likes" title="Liked tweets"/>
-                                </NextLink>
+                                <a 
+                                    href={`${searchBy === undefined ? "/?searchBy=LIKED" : '/'}`} 
+                                    className="header__link header__link_likes" 
+                                    title="Liked tweets"
+                                />
                             </> 
                         :   <>
                                 <a className="header__link header__link_profile" title="Profile" onClick={() => openAuthModal()}/>
                                 <a className="header__link header__link_likes" title="Liked tweets" onClick={() => openAuthModal()}/>
                             </>
                     }
-                    <a href={`${orderBy === undefined ? "/?orderBy=LIKES_COUNT" : '/'}`} className="header__link header__link_sort" title="Sort tweets"/>
+                    <a 
+                        href={`${searchBy === undefined ? "/?searchBy=LIKES_COUNT" : '/'}`} 
+                        className="header__link header__link_sort" 
+                        title="Sort tweets"
+                    />
                 </div>
             </section>
         </>

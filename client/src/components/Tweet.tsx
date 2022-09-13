@@ -1,4 +1,4 @@
-import { PostPreviewSnippetFragment, useMeQuery, useVoteMutation } from "../generated/graphql";
+import { PostPreviewSnippetFragment, useMeQuery, useLikeMutation } from "../generated/graphql";
 import { PostButtons } from "./PostButtons";
 
 interface TweetProps {
@@ -8,7 +8,7 @@ interface TweetProps {
 
 export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
     const [{ data: authUserData }] = useMeQuery();
-    const [, vote] = useVoteMutation();
+    const [, like] = useLikeMutation();
 
     return (
         <li>
@@ -54,10 +54,10 @@ export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
                     <button 
                         onClick={ 
                             authUserData?.me 
-                            ? async () => vote({value: 1, postId: post.id})
+                            ? async () => like({ postId: post.id })
                             : () => openModal()
                         } 
-                    className="tweet__like">
+                    className={ post.voteStatus === 1 ? "tweet__like tweet__like_active" : "tweet__like" }>
                         { post.likes_count }
                     </button>
                 </footer>

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Session } from "express-session";
 import { Redis } from "ioredis";
-import { createUpvoteLoader, createUserLoader } from "./utils/DataLoader";
+import { createLikeLoader, createUserLoader } from "./utils/DataLoader";
 
 interface SessionData {
   userId?: number;
@@ -18,5 +18,5 @@ export type MyContext = {
 
     userLoader: ReturnType<typeof createUserLoader> // lifehack
 
-    upvoteLoader: ReturnType<typeof createUpvoteLoader> // lifehack
+    likeLoader: ReturnType<typeof createLikeLoader> // lifehack
 }

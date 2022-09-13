@@ -22,7 +22,7 @@ import { PostResolver } from "./resolvers/PostResolver";
 import { UserResolver } from "./resolvers/UserResolver";
 import { MyContext } from "./types";
 import { LikeResolver } from "./resolvers/LikeResolver";
-import { createUpvoteLoader, createUserLoader } from "./utils/DataLoader";
+import { createLikeLoader, createUserLoader } from "./utils/DataLoader";
 import { AppDataSource } from "./typeorm-data-source";
 import { UploadResolver } from "./resolvers/UploadResolver";
 
@@ -85,7 +85,7 @@ const main = async() => {
             res, 
             redis, 
             userLoader: createUserLoader(), 
-            upvoteLoader: createUpvoteLoader()
+            likeLoader: createLikeLoader()
         }), //We can access the entity manager, request and response through context
     });
     await server.start();

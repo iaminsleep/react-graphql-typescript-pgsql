@@ -25,7 +25,7 @@ new DataLoader<number, User>(async userIds => {
 
 // keys = [{postId: 5, userId: 10}, {}, {}]
 // return {postId: 5, userId: 10, value: 1} and upvote itself
-export const createUpvoteLoader = () => 
+export const createLikeLoader = () => 
 new DataLoader<{postId: number, userId: number}, Like | null>(async (keys) => {
     const likes = await Like.findByIds(keys as any);
 

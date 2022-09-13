@@ -14,10 +14,10 @@ import { useRouter } from 'next/router'
 
 const Index = () => {
   const router = useRouter();
-  const { orderBy } = router.query;
+  const { searchBy } = router.query;
 
   const [variables, setVariables] = useState({ 
-    limit: 15, cursor: null as null | string, orderBy: orderBy as string | null
+    limit: 15, cursor: null as null | string, searchBy: searchBy as string | null
   });
 
   const [{data, error, fetching }] = useGetPostsQuery({
@@ -81,7 +81,7 @@ const Index = () => {
             { 
               limit: variables.limit, 
               cursor: data.posts.posts[data.posts.posts.length - 1].createdAt,
-              orderBy: orderBy as string | null
+              searchBy: searchBy as string | null
             })
           }} isLoading={fetching} m="auto" my={8}>
             Load more

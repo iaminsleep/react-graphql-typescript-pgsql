@@ -48,16 +48,19 @@ let PostResolver = class PostResolver {
     creator(post, { userLoader }) {
         return userLoader.load(post.creatorId);
     }
-    async voteStatus(post, { upvoteLoader, req }) {
+    async voteStatus(post, { likeLoader, req }) {
         if (!req.session.userId)
             return null;
-        const upvote = await upvoteLoader.load({
+        const like = await likeLoader.load({
             postId: post.id,
             userId: req.session.userId
         });
-        return upvote;
+        if (like)
+            return 1;
+        else
+            return 0;
     }
-    async posts(limit, cursor, orderBy) {
+    async posts(limit, cursor, searchBy, { req }) {
         const realLimit = Math.min(50, limit);
         const limitPaginationNumber = realLimit + 1;
         const replacements = [limitPaginationNumber];
@@ -67,10 +70,13 @@ let PostResolver = class PostResolver {
         const posts = await typeorm_data_source_1.AppDataSource.query(`
             select p.*
             from post p
+            ${searchBy === "LIKED"
+            ? `join "like" lk on lk."postId" = p.id WHERE lk."userId" = ${req.session.userId}`
+            : ''}
             ${cursor
             ? 'where p."createdAt" < $2'
             : ''}
-            ${orderBy === "LIKES_COUNT" ? 'order by p.likes_count DESC' : 'order by p."createdAt" DESC'}
+            ${searchBy === "LIKES_COUNT" ? 'order by p.likes_count DESC' : 'order by p."createdAt" DESC'}
             limit $1
         `, replacements);
         return {
@@ -151,9 +157,10 @@ __decorate([
     (0, type_graphql_1.Query)(() => PaginatedPosts),
     __param(0, (0, type_graphql_1.Arg)('limit', () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Arg)('cursor', () => String, { nullable: true })),
-    __param(2, (0, type_graphql_1.Arg)('orderBy', () => String, { nullable: true })),
+    __param(2, (0, type_graphql_1.Arg)('searchBy', () => String, { nullable: true })),
+    __param(3, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object, Object]),
+    __metadata("design:paramtypes", [Number, Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "posts", null);
 __decorate([

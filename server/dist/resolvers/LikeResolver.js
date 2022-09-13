@@ -18,36 +18,33 @@ const typeorm_data_source_1 = require("../typeorm-data-source");
 const type_graphql_1 = require("type-graphql");
 const Like_1 = require("../entities/Like");
 class LikeResolver {
-    async vote(postId, value, { req }) {
-        const isUpvote = value !== -1;
-        const realValue = isUpvote ? 1 : -1;
+    async like(postId, { req }) {
         const { userId } = req.session;
-        const upvote = await Like_1.Like.findOne({ where: { postId, userId } });
-        if (upvote) {
+        const like = await Like_1.Like.findOne({ where: { postId, userId } });
+        if (like) {
             await typeorm_data_source_1.AppDataSource.transaction(async (transactionManager) => {
                 await transactionManager.query(`
-                    update upvote
-                    set value = $1
-                    where "postId" = $2 and "userId" = $3;
-                `, [realValue, postId, userId]);
+                    delete from "like"
+                    where "userId" = $1 and "postId" = $2;
+                `, [userId, postId]);
                 await transactionManager.query(`
                     update post 
-                    set points = points + $1
-                    where id = $2;
-                `, [realValue, postId]);
+                    set likes_count = likes_count - 1
+                    where id = $1;
+                `, [postId]);
             });
         }
-        else if (!upvote) {
+        else if (!like) {
             await typeorm_data_source_1.AppDataSource.transaction(async (transactionManager) => {
                 await transactionManager.query(`
-                    insert into upvote ("userId", "postId", value)
-                    values ($1, $2, $3);
-                `, [userId, postId, realValue]);
+                    insert into "like" ("userId", "postId")
+                    values ($1, $2);
+                `, [userId, postId]);
                 await transactionManager.query(`
                     update post 
-                    set points = points + $1
-                    where id = $2;
-                `, [realValue, postId]);
+                    set likes_count = likes_count + 1
+                    where id = $1;
+                `, [postId]);
             });
         }
         return true;
@@ -57,11 +54,10 @@ __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
     (0, type_graphql_1.UseMiddleware)(isAuth_1.isAuth),
     __param(0, (0, type_graphql_1.Arg)('postId', () => type_graphql_1.Int)),
-    __param(1, (0, type_graphql_1.Arg)('value', () => type_graphql_1.Int)),
-    __param(2, (0, type_graphql_1.Ctx)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Number, Object]),
+    __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
-], LikeResolver.prototype, "vote", null);
+], LikeResolver.prototype, "like", null);
 exports.LikeResolver = LikeResolver;
 //# sourceMappingURL=LikeResolver.js.map

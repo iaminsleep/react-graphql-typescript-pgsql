@@ -48,16 +48,17 @@ export class PostResolver {
     @FieldResolver(() => Int, { nullable: true })
     async voteStatus(
         @Root() post: Post,
-        @Ctx() { upvoteLoader, req }: MyContext
+        @Ctx() { likeLoader, req }: MyContext
     ) {
         if(!req.session.userId) return null;
 
-        const upvote = await upvoteLoader.load({ 
+        const like = await likeLoader.load({ 
             postId: post.id, 
             userId: req.session.userId 
         })
 
-        return upvote; // return vote status - if the authenitcated user voted on the post
+        if(like) return 1;
+        else return 0; // return voteStatus - if the authenitcated user voted on the post
     }
 
     /** CRUD Operations Through GraphQL */
@@ -65,7 +66,8 @@ export class PostResolver {
     async posts(
         @Arg('limit', () => Int) limit: number, // limit of posts
         @Arg('cursor', () => String, { nullable: true}) cursor: string | null,
-        @Arg('orderBy', () => String, { nullable: true}) orderBy: string | null,
+        @Arg('searchBy', () => String, { nullable: true}) searchBy: string | null,
+        @Ctx() { req }: MyContext
     ): Promise<PaginatedPosts> {
         // await sleep(3000); // keep for fun, impacts delete post speed
         // return Post.find(); // returns Promise of ALL posts - completion of asynchronous operation.
@@ -83,11 +85,15 @@ export class PostResolver {
         const posts = await AppDataSource.query(`
             select p.*
             from post p
+            ${searchBy === "LIKED"
+                ? `join "like" lk on lk."postId" = p.id WHERE lk."userId" = ${req.session.userId}`
+                : ''
+            }
             ${cursor 
                 ? 'where p."createdAt" < $2'
                 : ''
             }
-            ${orderBy === "LIKES_COUNT" ? 'order by p.likes_count DESC' : 'order by p."createdAt" DESC'}
+            ${searchBy === "LIKES_COUNT" ? 'order by p.likes_count DESC' : 'order by p."createdAt" DESC'}
             limit $1
         `, replacements); // $1 means it will be first replacement. vote status changes only if user is authorized
 

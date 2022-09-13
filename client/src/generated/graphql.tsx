@@ -35,12 +35,12 @@ export type Mutation = {
   createPost: Post;
   deletePost: Scalars['Boolean'];
   forgotPassword: Scalars['Boolean'];
+  like: Scalars['Boolean'];
   login: UserResponse;
   logout: Scalars['Boolean'];
   register: UserResponse;
   updatePost: Post;
   uploadFile: FileResponse;
-  vote: Scalars['Boolean'];
 };
 
 
@@ -65,6 +65,11 @@ export type MutationForgotPasswordArgs = {
 };
 
 
+export type MutationLikeArgs = {
+  postId: Scalars['Int'];
+};
+
+
 export type MutationLoginArgs = {
   loginOrEmail: Scalars['String'];
   password: Scalars['String'];
@@ -85,12 +90,6 @@ export type MutationUpdatePostArgs = {
 
 export type MutationUploadFileArgs = {
   file: Scalars['Upload'];
-};
-
-
-export type MutationVoteArgs = {
-  postId: Scalars['Int'];
-  value: Scalars['Int'];
 };
 
 export type PaginatedPosts = {
@@ -135,7 +134,7 @@ export type QueryPostArgs = {
 export type QueryPostsArgs = {
   cursor?: InputMaybe<Scalars['String']>;
   limit: Scalars['Int'];
-  orderBy?: InputMaybe<Scalars['String']>;
+  searchBy?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -205,6 +204,13 @@ export type ForgotPasswordMutationVariables = Exact<{
 
 export type ForgotPasswordMutation = { __typename?: 'Mutation', forgotPassword: boolean };
 
+export type LikeMutationVariables = Exact<{
+  postId: Scalars['Int'];
+}>;
+
+
+export type LikeMutation = { __typename?: 'Mutation', like: boolean };
+
 export type LoginMutationVariables = Exact<{
   loginOrEmail: Scalars['String'];
   password: Scalars['String'];
@@ -241,14 +247,6 @@ export type UploadFileMutationVariables = Exact<{
 
 export type UploadFileMutation = { __typename?: 'Mutation', uploadFile: { __typename?: 'FileResponse', filename: string, mimetype: string, encoding: string } };
 
-export type VoteMutationVariables = Exact<{
-  value: Scalars['Int'];
-  postId: Scalars['Int'];
-}>;
-
-
-export type VoteMutation = { __typename?: 'Mutation', vote: boolean };
-
 export type GetPostQueryVariables = Exact<{
   id: Scalars['Int'];
 }>;
@@ -259,7 +257,7 @@ export type GetPostQuery = { __typename?: 'Query', post?: { __typename?: 'Post',
 export type GetPostsQueryVariables = Exact<{
   limit: Scalars['Int'];
   cursor?: InputMaybe<Scalars['String']>;
-  orderBy?: InputMaybe<Scalars['String']>;
+  searchBy?: InputMaybe<Scalars['String']>;
 }>;
 
 
@@ -377,6 +375,15 @@ export const ForgotPasswordDocument = gql`
 export function useForgotPasswordMutation() {
   return Urql.useMutation<ForgotPasswordMutation, ForgotPasswordMutationVariables>(ForgotPasswordDocument);
 };
+export const LikeDocument = gql`
+    mutation Like($postId: Int!) {
+  like(postId: $postId)
+}
+    `;
+
+export function useLikeMutation() {
+  return Urql.useMutation<LikeMutation, LikeMutationVariables>(LikeDocument);
+};
 export const LoginDocument = gql`
     mutation Login($loginOrEmail: String!, $password: String!) {
   login(loginOrEmail: $loginOrEmail, password: $password) {
@@ -437,15 +444,6 @@ export const UploadFileDocument = gql`
 export function useUploadFileMutation() {
   return Urql.useMutation<UploadFileMutation, UploadFileMutationVariables>(UploadFileDocument);
 };
-export const VoteDocument = gql`
-    mutation Vote($value: Int!, $postId: Int!) {
-  vote(value: $value, postId: $postId)
-}
-    `;
-
-export function useVoteMutation() {
-  return Urql.useMutation<VoteMutation, VoteMutationVariables>(VoteDocument);
-};
 export const GetPostDocument = gql`
     query GetPost($id: Int!) {
   post(id: $id) {
@@ -458,8 +456,8 @@ export function useGetPostQuery(options: Omit<Urql.UseQueryArgs<GetPostQueryVari
   return Urql.useQuery<GetPostQuery>({ query: GetPostDocument, ...options });
 };
 export const GetPostsDocument = gql`
-    query GetPosts($limit: Int!, $cursor: String, $orderBy: String) {
-  posts(limit: $limit, cursor: $cursor, orderBy: $orderBy) {
+    query GetPosts($limit: Int!, $cursor: String, $searchBy: String) {
+  posts(limit: $limit, cursor: $cursor, searchBy: $searchBy) {
     posts {
       ...PostPreviewSnippet
     }
