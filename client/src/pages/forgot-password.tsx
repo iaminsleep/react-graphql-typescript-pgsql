@@ -15,7 +15,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({}) => {
     const [complete, setComplete] = React.useState(false);
     const [, sendResetPasswordLink] = useForgotPasswordMutation();
     return (
-        <Wrapper variant="regular">
+        <Wrapper>
             <Formik
                 initialValues={{ email: "" }}
                 onSubmit={async (values) => {
@@ -31,7 +31,6 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({}) => {
                             <InputField
                                     name="email"
                                     placeholder="email@example.com"
-                                    label="Email"
                                     type="email"
                             />    
                             <Button

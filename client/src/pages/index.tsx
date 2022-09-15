@@ -17,7 +17,7 @@ const Index = () => {
   const { searchBy } = router.query;
 
   const [variables, setVariables] = useState({ 
-    limit: 15, cursor: null as null | string, searchBy: searchBy as string | null
+    limit: 15, cursor: null as null | string, searchBy: searchBy as string | null, userId: null as null | number
   });
 
   const [{data, error, fetching }] = useGetPostsQuery({
@@ -58,7 +58,7 @@ const Index = () => {
         <title>Twitter</title>
       </Head>
       { meData?.data?.me
-          ? <TweetForm authUserData={data}/>
+          ? <TweetForm authUserData={meData?.data}/>
           : null
       }
       {/* if data is true, the posts are going to show. */}
@@ -81,7 +81,8 @@ const Index = () => {
             { 
               limit: variables.limit, 
               cursor: data.posts.posts[data.posts.posts.length - 1].createdAt,
-              searchBy: searchBy as string | null
+              searchBy: searchBy as string | null,
+              userId: null as null | number
             })
           }} isLoading={fetching} m="auto" my={8}>
             Load more

@@ -135,6 +135,7 @@ export type QueryPostsArgs = {
   cursor?: InputMaybe<Scalars['String']>;
   limit: Scalars['Int'];
   searchBy?: InputMaybe<Scalars['String']>;
+  userId?: InputMaybe<Scalars['Int']>;
 };
 
 
@@ -165,15 +166,15 @@ export type UsernamePasswordInput = {
   password: Scalars['String'];
 };
 
-export type PostPreviewSnippetFragment = { __typename?: 'Post', id: number, textSnippet: string, postCreationDateString: string, likes_count: number, voteStatus?: number | null, image?: string | null, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } };
+export type PostPreviewSnippetFragment = { __typename?: 'Post', id: number, textSnippet: string, postCreationDateString: string, likes_count: number, voteStatus?: number | null, image?: string | null, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string } };
 
 export type RegularErrorFragment = { __typename?: 'FieldError', field: string, message: string };
 
-export type RegularPostFragment = { __typename?: 'Post', id: number, text: string, image?: string | null, likes_count: number, voteStatus?: number | null, postCreationDateString: string, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } };
+export type RegularPostFragment = { __typename?: 'Post', id: number, text: string, image?: string | null, likes_count: number, voteStatus?: number | null, postCreationDateString: string, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string } };
 
-export type RegularUserFragment = { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null };
+export type RegularUserFragment = { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string };
 
-export type RegularUserResponseFragment = { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } | null };
+export type RegularUserResponseFragment = { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string } | null };
 
 export type ChangePasswordMutationVariables = Exact<{
   token: Scalars['String'];
@@ -181,7 +182,7 @@ export type ChangePasswordMutationVariables = Exact<{
 }>;
 
 
-export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } | null } };
+export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string } | null } };
 
 export type CreatePostMutationVariables = Exact<{
   input: PostInput;
@@ -217,7 +218,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } | null } };
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string } | null } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -229,7 +230,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } | null } };
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string } | null } };
 
 export type UpdatePostMutationVariables = Exact<{
   id: Scalars['Int'];
@@ -252,28 +253,29 @@ export type GetPostQueryVariables = Exact<{
 }>;
 
 
-export type GetPostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, text: string, image?: string | null, likes_count: number, voteStatus?: number | null, postCreationDateString: string, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } } | null };
+export type GetPostQuery = { __typename?: 'Query', post?: { __typename?: 'Post', id: number, text: string, image?: string | null, likes_count: number, voteStatus?: number | null, postCreationDateString: string, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string } } | null };
 
 export type GetPostsQueryVariables = Exact<{
   limit: Scalars['Int'];
   cursor?: InputMaybe<Scalars['String']>;
   searchBy?: InputMaybe<Scalars['String']>;
+  userId?: InputMaybe<Scalars['Int']>;
 }>;
 
 
-export type GetPostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', id: number, textSnippet: string, postCreationDateString: string, likes_count: number, voteStatus?: number | null, image?: string | null, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } }> } };
+export type GetPostsQuery = { __typename?: 'Query', posts: { __typename?: 'PaginatedPosts', hasMore: boolean, posts: Array<{ __typename?: 'Post', id: number, textSnippet: string, postCreationDateString: string, likes_count: number, voteStatus?: number | null, image?: string | null, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string } }> } };
 
 export type GetUserQueryVariables = Exact<{
   id: Scalars['Int'];
 }>;
 
 
-export type GetUserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } | null };
+export type GetUserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string } | null };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string } | null };
 
 export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
@@ -281,6 +283,7 @@ export const RegularUserFragmentDoc = gql`
   login
   username
   avatar
+  createdAt
 }
     `;
 export const PostPreviewSnippetFragmentDoc = gql`
@@ -456,8 +459,8 @@ export function useGetPostQuery(options: Omit<Urql.UseQueryArgs<GetPostQueryVari
   return Urql.useQuery<GetPostQuery>({ query: GetPostDocument, ...options });
 };
 export const GetPostsDocument = gql`
-    query GetPosts($limit: Int!, $cursor: String, $searchBy: String) {
-  posts(limit: $limit, cursor: $cursor, searchBy: $searchBy) {
+    query GetPosts($limit: Int!, $cursor: String, $searchBy: String, $userId: Int) {
+  posts(limit: $limit, cursor: $cursor, searchBy: $searchBy, userId: $userId) {
     posts {
       ...PostPreviewSnippet
     }

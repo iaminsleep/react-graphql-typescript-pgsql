@@ -154,6 +154,10 @@ button {
 	cursor: pointer;
 }
 
+.cursor-pointer {
+	cursor: pointer;
+}
+
 .header__link_current {
 	background-color: rgba(29, 161, 242, 0.1);
 }

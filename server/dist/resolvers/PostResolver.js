@@ -60,7 +60,7 @@ let PostResolver = class PostResolver {
         else
             return 0;
     }
-    async posts(limit, cursor, searchBy, { req }) {
+    async posts(limit, cursor, searchBy, userId, { req }) {
         const realLimit = Math.min(50, limit);
         const limitPaginationNumber = realLimit + 1;
         const replacements = [limitPaginationNumber];
@@ -75,6 +75,9 @@ let PostResolver = class PostResolver {
             : ''}
             ${cursor
             ? 'where p."createdAt" < $2'
+            : ''}
+            ${userId
+            ? `where p."creatorId" = ${userId}`
             : ''}
             ${searchBy === "LIKES_COUNT" ? 'order by p.likes_count DESC' : 'order by p."createdAt" DESC'}
             limit $1
@@ -158,9 +161,10 @@ __decorate([
     __param(0, (0, type_graphql_1.Arg)('limit', () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Arg)('cursor', () => String, { nullable: true })),
     __param(2, (0, type_graphql_1.Arg)('searchBy', () => String, { nullable: true })),
-    __param(3, (0, type_graphql_1.Ctx)()),
+    __param(3, (0, type_graphql_1.Arg)('userId', () => type_graphql_1.Int, { nullable: true })),
+    __param(4, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object, Object, Object]),
+    __metadata("design:paramtypes", [Number, Object, Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "posts", null);
 __decorate([

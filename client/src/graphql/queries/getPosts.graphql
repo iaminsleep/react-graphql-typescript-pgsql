@@ -1,5 +1,10 @@
-query GetPosts($limit: Int!, $cursor: String, $searchBy: String) {
-    posts(limit: $limit, cursor: $cursor, searchBy: $searchBy) {
+query GetPosts($limit: Int!, $cursor: String, $searchBy: String, $userId: Int) {
+    posts(
+        limit: $limit
+        cursor: $cursor
+        searchBy: $searchBy
+        userId: $userId
+    ) {
         posts {
             ...PostPreviewSnippet
         }

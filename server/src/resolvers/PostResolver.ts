@@ -67,6 +67,7 @@ export class PostResolver {
         @Arg('limit', () => Int) limit: number, // limit of posts
         @Arg('cursor', () => String, { nullable: true}) cursor: string | null,
         @Arg('searchBy', () => String, { nullable: true}) searchBy: string | null,
+        @Arg('userId', () => Int, { nullable: true}) userId: number | null,
         @Ctx() { req }: MyContext
     ): Promise<PaginatedPosts> {
         // await sleep(3000); // keep for fun, impacts delete post speed
@@ -91,6 +92,10 @@ export class PostResolver {
             }
             ${cursor 
                 ? 'where p."createdAt" < $2'
+                : ''
+            }
+            ${userId
+                ? `where p."creatorId" = ${userId}`
                 : ''
             }
             ${searchBy === "LIKES_COUNT" ? 'order by p.likes_count DESC' : 'order by p."createdAt" DESC'}
