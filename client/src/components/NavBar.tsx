@@ -1,13 +1,13 @@
-import Link from 'next/link';
-import NextLink from 'next/link';
 import { useRouter } from 'next/router';
+import { MeQuery } from "../generated/graphql";
 
 interface NavBarProps {
     isAuth: Boolean,
     openAuthModal: Function,
+    meData: MeQuery | null | undefined,
 }
 
-export const NavBar: React.FC<NavBarProps> = ({ isAuth, openAuthModal }) => {
+export const NavBar: React.FC<NavBarProps> = ({ isAuth, openAuthModal, meData }) => {
     const router = useRouter()
     const { searchBy } = router.query;
 
@@ -15,14 +15,10 @@ export const NavBar: React.FC<NavBarProps> = ({ isAuth, openAuthModal }) => {
         <>
             <section className="wrapper">
                 <div className="main-header">
-                    <NextLink href="/">
-                        <a className="header__link header__link_home" title="Feed"/>
-                    </NextLink>
+                    <a href="/" className="header__link header__link_home" title="Feed"/>
                     { isAuth 
                         ?   <>
-                                <NextLink href="/profile">
-                                    <a className="header__link header__link_profile" title="Profile"/>
-                                </NextLink>
+                                <a href={`/user/${meData?.me?.id}`} className="header__link header__link_profile" title="Profile"/>
                                 <a 
                                     href={`${searchBy === undefined ? "/?searchBy=LIKED" : '/'}`} 
                                     className="header__link header__link_likes" 

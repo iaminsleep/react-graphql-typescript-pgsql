@@ -20,7 +20,7 @@ const Index = () => {
     limit: 15, cursor: null as null | string, searchBy: searchBy as string | null, userId: null as null | number
   });
 
-  const [{data, error, fetching }] = useGetPostsQuery({
+  const [{ data, error, fetching }] = useGetPostsQuery({
     variables,
   });
 

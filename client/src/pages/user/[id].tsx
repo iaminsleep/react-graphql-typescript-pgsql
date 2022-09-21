@@ -15,6 +15,11 @@ import { useGetUserFromUrl } from "../../utils/useGetUserFromUrl";
 export const User = ({}) => {
     const router = useRouter();
     const { searchBy } = router.query;
+    const joinTime = new Intl.DateTimeFormat( 'en-US', {
+        month: 'long',
+        year: 'numeric',
+        day: 'numeric',
+    });
 
     const [{ data, fetching }] = useGetUserFromUrl();
 
@@ -60,26 +65,45 @@ export const User = ({}) => {
         )
     }
 
-    console.log(postData.data?.posts.posts)
-
     return (
         <Layout openModal={openModal}>
-            <div className="">
-                <img
-                    className="avatar"
-                    src={ data.user.avatar ? "img/avatar.png" : "img/no_avatar.png"}
-                    alt={`${data.user.login}'s avatar`}
-                />
-                <button></button>
-                <h2>{data.user.username}</h2>
-                <h3>{data.user.login}</h3>
-                <div><p>{data.user.createdAt}</p></div>
+            <div className="profile">
+                <div className="profile-full">
+                    <div className={ meData?.data?.me?.id === data.user.id ? 'profile-upper' : '' }>
+                        <img
+                            className="avatar avatar-profile"
+                            src={ data.user.avatar 
+                                ? `${process.env.PUBLIC_URL}/img/avatar.png` 
+                                : `${process.env.PUBLIC_URL}/img/no_avatar.png`
+                            }
+                            alt={`${data.user.login}'s avatar`}
+                        />
+                        { meData?.data?.me?.id === data.user.id
+                            ?   <Button variant="secondary" onClick={() => router.push('/settings')}>
+                                    Edit profile
+                                </Button>
+                            : null
+                        }
+                    </div>
+                    <div className="profile-lower">
+                        <div className="lower-username">
+                            <h2 className="username">{data.user.username ?? data.user.login}</h2>
+                            <h3 className="login">@{data.user.login}</h3>
+                        </div>
+                        <div className="join-time">
+                            <img src={`${process.env.PUBLIC_URL}/img/calendar.png`} className="calendar"/>
+                            <p className="zamn">
+                                Joined { joinTime.format(new Date(parseInt(data.user.createdAt))) }
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <Head>
                 <title>Twitter</title>
             </Head>
-            { meData?.data?.me
-                ? <TweetForm authUserData={data}/>
+            { meData?.data?.me?.id === data.user.id
+                ? <TweetForm authUserData={meData?.data}/>
                 : null
             }
             {/* if data is true, the posts are going to show. */}

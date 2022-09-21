@@ -59,8 +59,8 @@ export const TweetForm: React.FC<TweetFormProps> = ({ authUserData }) => {
                         <img
                             className="avatar"
                             src={ authUserData?.me 
-                                ? "/img/avatar.png" 
-                                : "img/no_avatar.png"
+                                ? `${process.env.PUBLIC_URL}/img/no_avatar.png`
+                                : `${process.env.PUBLIC_URL}/img/no_avatar.png`
                             }
                             alt="Avatar"
                         />

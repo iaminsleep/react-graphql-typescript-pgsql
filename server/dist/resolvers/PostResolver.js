@@ -68,18 +68,24 @@ let PostResolver = class PostResolver {
             replacements.push(new Date(parseInt(cursor)));
         }
         const posts = await typeorm_data_source_1.AppDataSource.query(`
-            select p.*
-            from post p
-            ${searchBy === "LIKED"
-            ? `join "like" lk on lk."postId" = p.id WHERE lk."userId" = ${req.session.userId}`
+            SELECT p.*
+            FROM post p
+            ${searchBy === "LIKED" && req.session.userId
+            ? `JOIN "like" lk ON lk."postId" = p.id WHERE lk."userId" = ${req.session.userId}`
             : ''}
-            ${cursor
-            ? 'where p."createdAt" < $2'
+            ${searchBy === "LIKED" && req.session.userId && cursor
+            ? ' AND p."createdAt" < $2'
             : ''}
-            ${userId
-            ? `where p."creatorId" = ${userId}`
+            ${searchBy !== "LIKED" && cursor
+            ? 'WHERE p."createdAt" < $2'
             : ''}
-            ${searchBy === "LIKES_COUNT" ? 'order by p.likes_count DESC' : 'order by p."createdAt" DESC'}
+            ${(searchBy === "LIKED" || cursor && req.session.userId) && userId
+            ? ` AND p."creatorId" = ${userId}`
+            : ''}
+            ${(searchBy !== "LIKED" && !cursor) && userId
+            ? `WHERE p."creatorId" = ${userId}`
+            : ''}
+            ${searchBy === "LIKES_COUNT" ? 'ORDER BY p.likes_count DESC' : 'ORDER BY p."createdAt" DESC'}
             limit $1
         `, replacements);
         return {

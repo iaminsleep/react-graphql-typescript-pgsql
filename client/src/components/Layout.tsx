@@ -25,12 +25,12 @@ export const Layout: React.FC<LayoutProps> = ({ openModal, children }) => {
     return (
         <>
             <Head>
-                <link rel="icon" href="img/twitter.png"/>
+                <link rel="icon" href={`${process.env.PUBLIC_URL}/img/twitter.png`}/>
             </Head>
             <div className="container row">
                 <Header openModal={openModal} authUserData={data}></Header>
                 <main className="main">
-                    <NavBar isAuth={data?.me !== null} openAuthModal={openModal}/>
+                    <NavBar isAuth={data?.me !== null} meData={data ?? null} openAuthModal={openModal}/>
                     <Wrapper>
                         { children }
                     </Wrapper>

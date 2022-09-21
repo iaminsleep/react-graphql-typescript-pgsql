@@ -1,3 +1,4 @@
+import { Link } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { PostPreviewSnippetFragment, useMeQuery, useLikeMutation } from "../generated/graphql";
 import { PostButtons } from "./PostButtons";
@@ -14,51 +15,54 @@ export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
     return (
         <li>
             <article className="tweet">
-                <NextLink href="/post/[id]" as={`/post/${post.id}`}>
                     <div className="cursor-pointer">
                         <div className="row">
-                            <NextLink href="/user/[id]" as={`/user/${post.creator.id}`}>
+                            <Link href={`/user/${post.creator.id}`}>
                                 <img
                                     className="avatar"
-                                    src={ post.creator.avatar ? "img/avatar.png" : "img/no_avatar.png"}
+                                    src={ post.creator.avatar 
+                                        ? `${process.env.PUBLIC_URL}/img/avatar.png` 
+                                        : `${process.env.PUBLIC_URL}/img/no_avatar.png`
+                                    }
                                     alt={`${post.creator.login}'s avatar`}
                                 />
-                            </NextLink>
+                            </Link>
                             <div className="tweet__wrapper">
                                 <header className="tweet__header">
-                                    <NextLink href="/user/[id]" as={`/user/${post.creator.id}`}>
+                                    <Link href={`/user/${post.creator.id}`}>
                                         <div className="tweet_div">
                                             <h3 className="tweet-author">
                                                 { post.creator.username ?? post.creator.login }
                                             </h3>
-                                            <a
-                                                href="#"
-                                                className="tweet-author__add tweet-author__nickname"
-                                                >@{ post.creator.login }
-                                            </a>
+                                            <p className="tweet-author__add tweet-author__nickname">
+                                                @{ post.creator.login }
+                                            </p>
                                         </div>
-                                    </NextLink>
+                                    </Link>
                                     { authUserData?.me?.id === post.creator.id && 
                                         <PostButtons postId={post.id}/>
                                     }
                                 </header>
-                                <div className="tweet-post">
-                                    <p className="tweet-post__text">
-                                        { post.textSnippet }
-                                    </p>
-                                    {/* <figure className="tweet-post__image">
-                                        <img
-                                            src="https://chudo-prirody.com/uploads/posts/2021-08/1628921960_133-p-foto-milikh-kotyat-i-shchenyat-144.jpg"
-                                        />
-                                    </figure> */}
-                                    <time className="tweet-author__add tweet__date">
-                                        { post.postCreationDateString }
-                                    </time>
-                                </div>
+                                <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+                                    <a>
+                                        <div className="tweet-post">
+                                            <p className="tweet-post__text">
+                                                { post.textSnippet }
+                                            </p>
+                                            {/* <figure className="tweet-post__image">
+                                                <img
+                                                    src="https://chudo-prirody.com/uploads/posts/2021-08/1628921960_133-p-foto-milikh-kotyat-i-shchenyat-144.jpg"
+                                                />
+                                            </figure> */}
+                                            <time className="tweet-author__add tweet__date">
+                                                { post.postCreationDateString }
+                                            </time>
+                                        </div>
+                                    </a>
+                                </NextLink>
                             </div>
                         </div>
                     </div>
-                </NextLink>
                 <footer>
                     <button 
                         onClick={ 

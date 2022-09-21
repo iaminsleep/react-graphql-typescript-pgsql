@@ -12,6 +12,16 @@ const breakpoints = createBreakpoints({
 
 const theme = extendTheme({
   components: {
+    Link: {
+      baseStyle: {
+        // normal styling
+        textDecoration: "none",
+        // hover styling goes here
+        _hover: {
+          textDecoration: "none",
+        },
+      },
+    },
     Button: {
       baseStyle: {
         display: 'block',
@@ -27,7 +37,15 @@ const theme = extendTheme({
         // Make a variant, we'll call it `base` here and leave it empty
         base: {},
         secondary: {
-          //...define other variants        
+          display: 'block',
+          backgroundColor: 'rgb(255, 255, 255)',
+          color: 'rgb(26, 145, 218)',
+          padding: '0 15px',
+          borderRadius: '9999px',
+          height: '40px',
+          fontSize: '16px',
+          fontWeight: 700,
+          border: '1px solid rgb(26, 145, 218)',
         }
       },
       defaultProps: {
