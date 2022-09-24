@@ -20,7 +20,7 @@ export const NavBar: React.FC<NavBarProps> = ({ isAuth, openAuthModal, meData })
                         ?   <>
                                 <a href={`/user/${meData?.me?.id}`} className="header__link header__link_profile" title="Profile"/>
                                 <a 
-                                    href={`${searchBy === undefined ? "/?searchBy=LIKED" : '/'}`} 
+                                    href={`${searchBy !== "LIKED" ? "/?searchBy=LIKED" : '/'}`} 
                                     className="header__link header__link_likes" 
                                     title="Liked tweets"
                                 />
@@ -31,7 +31,7 @@ export const NavBar: React.FC<NavBarProps> = ({ isAuth, openAuthModal, meData })
                             </>
                     }
                     <a 
-                        href={`${searchBy === undefined ? "/?searchBy=LIKES_COUNT" : '/'}`} 
+                        href={`${searchBy !== "LIKES_COUNT" ? "/?searchBy=LIKES_COUNT" : '/'}`} 
                         className="header__link header__link_sort" 
                         title="Sort tweets"
                     />

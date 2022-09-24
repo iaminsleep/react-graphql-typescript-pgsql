@@ -20,7 +20,7 @@ class PaginatedPosts {
 export class PostResolver {
     @FieldResolver(() => String)
     textSnippet(@Root() post: Post) {
-        return post.text.slice(0, 50);
+        return post.text.slice(0, 200);
     }
     @FieldResolver(() => String)
     postCreationDateString(@Root() post: Post) {

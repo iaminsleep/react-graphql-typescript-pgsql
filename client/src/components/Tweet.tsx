@@ -21,7 +21,7 @@ export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
                                 <img
                                     className="avatar"
                                     src={ post.creator.avatar 
-                                        ? `${process.env.PUBLIC_URL}/img/avatar.png` 
+                                        ? `${process.env.PUBLIC_URL}/img/no_avatar.png` 
                                         : `${process.env.PUBLIC_URL}/img/no_avatar.png`
                                     }
                                     alt={`${post.creator.login}'s avatar`}
@@ -48,6 +48,7 @@ export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
                                         <div className="tweet-post">
                                             <p className="tweet-post__text">
                                                 { post.textSnippet }
+                                                { post.textSnippet.length === 200 ? '...' : ''}
                                             </p>
                                             {/* <figure className="tweet-post__image">
                                                 <img

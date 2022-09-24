@@ -1,11 +1,12 @@
 // folder/[filename].tsx === route/queryname=value
 
-import { Box, Heading } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
+import Head from "next/head";
 import { useState } from "react";
 import { AuthModal } from "../../components/AuthModal";
 import { Layout } from "../../components/Layout";
-import { PostButtons } from "../../components/PostButtons";
+import { TweetPage } from "../../components/TweetPage";
 import { createUrqlClient } from "../../utils/createUrqlClient";
 import { useGetPostFromUrl } from "../../utils/useGetPostFromUrl";
 
@@ -38,12 +39,10 @@ export const Post = ({}) => {
 
     return (
         <Layout openModal={openModal}>
-            <Box>{data?.post?.text}</Box>
-            <Box>
-                <PostButtons 
-                    postId={data?.post?.id} 
-                />
-            </Box>
+            <Head>
+                <title>{ data?.post.creator.username ?? data?.post.creator.login }'s post</title>
+            </Head>
+            <TweetPage key={data?.post.id} post={data?.post} openModal={openModal}/>
             { isModalOpen 
                 ? <AuthModal closeModal={closeModal}></AuthModal>
                 : ''
