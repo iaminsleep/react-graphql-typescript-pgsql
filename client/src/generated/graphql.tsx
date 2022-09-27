@@ -24,9 +24,7 @@ export type FieldError = {
 
 export type FileResponse = {
   __typename?: 'FileResponse';
-  encoding: Scalars['String'];
-  filename: Scalars['String'];
-  mimetype: Scalars['String'];
+  newFilename: Scalars['String'];
 };
 
 export type Mutation = {
@@ -114,6 +112,7 @@ export type Post = {
 };
 
 export type PostInput = {
+  image?: InputMaybe<Scalars['String']>;
   text: Scalars['String'];
 };
 
@@ -240,13 +239,6 @@ export type UpdatePostMutationVariables = Exact<{
 
 
 export type UpdatePostMutation = { __typename?: 'Mutation', updatePost: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, image?: string | null, text: string, textSnippet: string } };
-
-export type UploadFileMutationVariables = Exact<{
-  file: Scalars['Upload'];
-}>;
-
-
-export type UploadFileMutation = { __typename?: 'Mutation', uploadFile: { __typename?: 'FileResponse', filename: string, mimetype: string, encoding: string } };
 
 export type GetPostQueryVariables = Exact<{
   id: Scalars['Int'];
@@ -433,19 +425,6 @@ export const UpdatePostDocument = gql`
 
 export function useUpdatePostMutation() {
   return Urql.useMutation<UpdatePostMutation, UpdatePostMutationVariables>(UpdatePostDocument);
-};
-export const UploadFileDocument = gql`
-    mutation UploadFile($file: Upload!) {
-  uploadFile(file: $file) {
-    filename
-    mimetype
-    encoding
-  }
-}
-    `;
-
-export function useUploadFileMutation() {
-  return Urql.useMutation<UploadFileMutation, UploadFileMutationVariables>(UploadFileDocument);
 };
 export const GetPostDocument = gql`
     query GetPost($id: Int!) {

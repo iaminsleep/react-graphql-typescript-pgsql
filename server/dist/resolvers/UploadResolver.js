@@ -34,29 +34,21 @@ let FileResponse = class FileResponse {
 __decorate([
     (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
-], FileResponse.prototype, "filename", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(),
-    __metadata("design:type", String)
-], FileResponse.prototype, "mimetype", void 0);
-__decorate([
-    (0, type_graphql_1.Field)(),
-    __metadata("design:type", String)
-], FileResponse.prototype, "encoding", void 0);
+], FileResponse.prototype, "newFilename", void 0);
 FileResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], FileResponse);
 let UploadResolver = class UploadResolver {
     async uploadFile(file) {
-        const { createReadStream, filename, mimetype, encoding } = file;
+        const { createReadStream, filename } = file;
         const { ext } = path_1.default.parse(filename);
-        const randomName = generateRandomString(12) + ext;
+        const newFilename = generateRandomString(12) + ext;
         const stream = createReadStream();
-        const pathName = path_1.default.join(__dirname, `./public/img/post/${randomName}`);
+        const pathName = path_1.default.join(__dirname, `../../../client/public/img/post/${newFilename}`);
         const out = require('fs').createWriteStream(pathName);
         stream.pipe(out);
         await (0, promises_1.finished)(out);
-        return { filename, mimetype, encoding };
+        return { newFilename };
     }
 };
 __decorate([

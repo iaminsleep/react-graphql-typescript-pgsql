@@ -70,7 +70,10 @@ const main = async () => {
         }),
     });
     await server.start();
-    app.use((0, graphql_upload_1.graphqlUploadExpress)({ maxFileSize: 10000, maxFiles: 10 }));
+    app.use((0, graphql_upload_1.graphqlUploadExpress)({
+        maxFileSize: 10000000,
+        maxFiles: 20
+    }));
     const corsOptions = {
         origin: [
             process.env.CORS_ORIGIN,

@@ -90,11 +90,11 @@ export const createUrqlClient = (ssrExchange: any, ctx: any): any => {
         url: "http://localhost:8080/graphql",
         fetchOptions: {
             credentials: "include", // we need this to get cookies. credentaisl were readonly so we converted it to const
-            headers: userIdCookie
-            ? { 
-                Cookie: 'qid='+userIdCookie
-            }
-            : undefined,
+            headers: {
+                Cookie: userIdCookie 
+                    ? 'qid='+userIdCookie 
+                    : undefined
+            },
         },
         exchanges: [dedupExchange, cacheExchange({
             keys: {

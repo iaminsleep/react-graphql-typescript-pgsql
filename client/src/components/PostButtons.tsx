@@ -1,5 +1,5 @@
 import NextLink from "next/link";
-import { useDeletePostMutation, useMeQuery } from "../generated/graphql";
+import { useDeletePostMutation } from "../generated/graphql";
 
 interface PostButtonsProps {
     postId: number,

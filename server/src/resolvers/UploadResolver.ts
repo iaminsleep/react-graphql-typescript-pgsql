@@ -16,13 +16,7 @@ function generateRandomString(length: number) {
 @ObjectType() // GraphQL object
 class FileResponse {
     @Field()
-    filename!: string;
-
-    @Field()
-    mimetype!: string;
-
-    @Field()
-    encoding!: string;
+    newFilename!: string;
 }
 
 @Resolver()
@@ -31,19 +25,19 @@ export class UploadResolver {
     async uploadFile(
         @Arg('file', () => GraphQLUpload) file: FileUpload,
     ): Promise<FileResponse> {
-        const { createReadStream, filename, mimetype, encoding } = file;
+        const { createReadStream, filename } = file;
 
         const { ext } = path.parse(filename);
-        const randomName = generateRandomString(12) + ext;
+        const newFilename = generateRandomString(12) + ext;
         // Invoking the `createReadStream` will return a Readable Stream
         const stream = createReadStream();
 
-        const pathName = path.join(__dirname, `./public/img/post/${randomName}`);
+        const pathName = path.join(__dirname, `../../../client/public/img/post/${newFilename}`);
 
         const out = require('fs').createWriteStream(pathName);
         stream.pipe(out);
         await finished(out);
 
-        return { filename, mimetype, encoding };
+        return { newFilename };
     }
 }
