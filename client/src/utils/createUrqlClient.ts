@@ -6,6 +6,7 @@ import { pipe, tap } from 'wonka';
 import Router from "next/router";
 import gql from 'graphql-tag';
 import { isServer } from "./isServer";
+import { multipartFetchExchange } from '@urql/exchange-multipart-fetch';
 
 // functon to catch any errors on server side
 const errorExchange: Exchange = ({ forward }) => ops$ => {
@@ -93,7 +94,8 @@ export const createUrqlClient = (ssrExchange: any, ctx: any): any => {
             headers: {
                 Cookie: userIdCookie 
                     ? 'qid='+userIdCookie 
-                    : undefined
+                    : undefined,
+                'apollo-require-preflight': true,
             },
         },
         exchanges: [dedupExchange, cacheExchange({
@@ -196,6 +198,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any): any => {
         }), 
         errorExchange,
         ssrExchange, 
-        fetchExchange ],
+        multipartFetchExchange,
+        fetchExchange, ],
     }
 }

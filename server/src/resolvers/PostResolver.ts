@@ -2,10 +2,11 @@ import { Post } from "../entities/Post";
 import { Arg, Ctx, Field, FieldResolver, Int, Mutation, ObjectType, Query, Resolver, Root, UseMiddleware } from "type-graphql";
 import { MyContext } from "../types";
 import { isAuth } from "../middleware/isAuth";
-import { PostInput } from "../utils/PostInput";
 import { AppDataSource } from "../typeorm-data-source";
 import { User } from "../entities/User";
-// import { Upvote } from "../entities/Upvote";
+import { FileUpload, GraphQLUpload } from "graphql-upload";
+import path from 'path';
+import { finished } from 'stream/promises';
 
 @ObjectType()
 class PaginatedPosts {
@@ -13,6 +14,16 @@ class PaginatedPosts {
     posts: Post[] // return an array of posts
     @Field()
     hasMore: boolean; // helps define if there are any posts left
+}
+
+function generateRandomString(length: number) {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
 }
 
 // speicfy what we are resolving 
@@ -126,9 +137,10 @@ export class PostResolver {
     }
 
     @Mutation(() => Post)
-    @UseMiddleware(isAuth) // check if user is authenticated by checking the cookie in the database. simple as that.
+    @UseMiddleware(isAuth) // check if user is authenticated by checking the cookie in the database
     async createPost(
-        @Arg('input') input: PostInput,
+        @Arg('text') text: string,
+        @Arg('file', () => GraphQLUpload, { nullable: true }) file: FileUpload,
         @Ctx() { req }: MyContext
     ): Promise<Post> {
         const queryRunner = AppDataSource.createQueryRunner();
@@ -137,9 +149,26 @@ export class PostResolver {
         );
         const lastId = result[0].max;
 
+        let newFilename = null;
+        
+        if(file) {
+            const { createReadStream, filename } = file;
+
+            const { ext } = path.parse(filename);
+            newFilename = generateRandomString(12) + ext;
+            const stream = createReadStream();
+
+            const pathName = path.join(__dirname, `../../../client/public/img/post/${newFilename}`);
+
+            const out = require('fs').createWriteStream(pathName);
+            stream.pipe(out);
+            await finished(out);
+        }
+
         return Post.create({
             id: lastId + 1,
-            ...input, // paste user input
+            text, // paste user input
+            image: newFilename ?? null,
             creatorId: req.session.userId // take userid from express-session (not redis database!)
         }).save(); // save() function from typeorm equivalent to MikroORM's 'persistAndFlush()'
     }

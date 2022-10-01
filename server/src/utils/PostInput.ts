@@ -4,6 +4,4 @@ import { Field, InputType } from "type-graphql";
 export class PostInput {
     @Field()
     text!: string;
-    @Field({ nullable: true })
-    image: string;
 }

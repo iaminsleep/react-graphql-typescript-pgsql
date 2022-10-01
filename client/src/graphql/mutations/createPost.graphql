@@ -1,5 +1,5 @@
-mutation CreatePost($input: PostInput!) {
-    createPost(input: $input) {
+mutation CreatePost($text: String!, $file: Upload) {
+    createPost(text: $text, file: $file) {
         id
         text
         image

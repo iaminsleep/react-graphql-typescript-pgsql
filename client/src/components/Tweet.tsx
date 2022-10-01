@@ -2,16 +2,28 @@ import { Link } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { PostPreviewSnippetFragment, useMeQuery, useLikeMutation } from "../generated/graphql";
 import { PostButtons } from "./PostButtons";
+import { useState } from "react";
 
 interface TweetProps {
     openModal: Function,
     post: PostPreviewSnippetFragment;
 }
 
+
 export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
     const [{ data: authUserData }] = useMeQuery();
     const [, like] = useLikeMutation();
 
+    const Image = ({ src, alt, fallback }: any) => {
+        const [error, setError] = useState(false);
+
+        const onError = () => {
+            setError(true);
+        };
+
+        return error ? fallback : <img src={src} alt={alt} onError={onError} />;
+    };
+    
     return (
         <li>
             <article className="tweet">
@@ -43,24 +55,31 @@ export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
                                         <PostButtons postId={post.id}/>
                                     }
                                 </header>
-                                <NextLink href="/post/[id]" as={`/post/${post.id}`}>
-                                    <a>
-                                        <div className="tweet-post">
+                                <div className="tweet-post">
+                                    <NextLink href="/post/[id]" as={`/post/${post.id}`}>
                                             <p className="tweet-post__text">
                                                 { post.textSnippet }
                                                 { post.textSnippet.length === 200 ? '...' : ''}
                                             </p>
-                                            {/* <figure className="tweet-post__image">
-                                                <img
-                                                    src="https://chudo-prirody.com/uploads/posts/2021-08/1628921960_133-p-foto-milikh-kotyat-i-shchenyat-144.jpg"
-                                                />
-                                            </figure> */}
-                                            <time className="tweet-author__add tweet__date">
-                                                { post.postCreationDateString }
-                                            </time>
-                                        </div>
-                                    </a>
-                                </NextLink>
+                                    </NextLink>
+                                    { post.image
+                                        ? 
+                                            <a href={`${process.env.PUBLIC_URL}/img/post/${post.image}`} target="_blank">
+                                                <figure className="tweet-post__image">
+                                                    <Image 
+                                                        fallback={
+                                                            <img src={`${process.env.PUBLIC_URL}/img/no_image.jpg`} alt="no_image"/>
+                                                        } 
+                                                        src={`${process.env.PUBLIC_URL}/img/post/${post.image}`}
+                                                    />
+                                                </figure>
+                                            </a>
+                                        : null
+                                    }
+                                    <time className="tweet-author__add tweet__date">
+                                        { post.postCreationDateString }
+                                    </time>
+                                </div>
                             </div>
                         </div>
                     </div>

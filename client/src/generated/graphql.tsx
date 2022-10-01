@@ -49,7 +49,8 @@ export type MutationChangePasswordArgs = {
 
 
 export type MutationCreatePostArgs = {
-  input: PostInput;
+  file?: InputMaybe<Scalars['Upload']>;
+  text: Scalars['String'];
 };
 
 
@@ -109,11 +110,6 @@ export type Post = {
   textSnippet: Scalars['String'];
   updatedAt: Scalars['String'];
   voteStatus?: Maybe<Scalars['Int']>;
-};
-
-export type PostInput = {
-  image?: InputMaybe<Scalars['String']>;
-  text: Scalars['String'];
 };
 
 export type Query = {
@@ -184,7 +180,8 @@ export type ChangePasswordMutationVariables = Exact<{
 export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string } | null } };
 
 export type CreatePostMutationVariables = Exact<{
-  input: PostInput;
+  text: Scalars['String'];
+  file?: InputMaybe<Scalars['Upload']>;
 }>;
 
 
@@ -337,8 +334,8 @@ export function useChangePasswordMutation() {
   return Urql.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument);
 };
 export const CreatePostDocument = gql`
-    mutation CreatePost($input: PostInput!) {
-  createPost(input: $input) {
+    mutation CreatePost($text: String!, $file: Upload) {
+  createPost(text: $text, file: $file) {
     id
     text
     image

@@ -2,17 +2,9 @@ import { Button } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { MeQuery, useCreatePostMutation, useUploadFileMutation } from '../generated/graphql';
+import { MeQuery, useCreatePostMutation } from '../generated/graphql';
 import { TextareaInput } from './TextareaInput';
-import { gql, useMutation } from "@apollo/client";
-
-const MUTATION = gql`
-    mutation ($file: Upload!) {
-        uploadFile(file: $file) {
-            newFilename
-        }
-    }
-`;
+import { FileInput } from './FileInput';
 
 interface TweetFormProps {
     authUserData?: MeQuery
@@ -21,33 +13,19 @@ interface TweetFormProps {
 export const TweetForm: React.FC<TweetFormProps> = ({ authUserData }) => {
     const router = useRouter();
 
-    const [mutate] = useMutation(MUTATION);
-    const [, createPost] = useCreatePostMutation();
+    const [ , createPost ] = useCreatePostMutation();
 
-    const [image, setImage] = useState('');
     const [createObjectURL, setCreateObjectURL] = useState('');
 
-    const uploadToClient = (e: React.ChangeEvent<any>) => {
+    const createPreviewImage = (e: React.ChangeEvent<any>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
 
             if(!file) return false;
 
-            try {
-                mutate({ 
-                    variables: { file },
-                    context: { 
-                        headers: { 'apollo-require-preflight': true, }
-                    }
-                }).then((response) => {
-                    const newFilename = response!.data!.uploadFile.newFilename
-                    setImage(newFilename);
-                }).catch(errors => { console.log(errors) });
-            } catch(err) {
-                console.log(err);
-            }
-
             setCreateObjectURL(URL.createObjectURL(file));
+
+            return file;
         }
     }
 
@@ -55,16 +33,18 @@ export const TweetForm: React.FC<TweetFormProps> = ({ authUserData }) => {
         <section className="wrapper">
             <Formik
                 enableReinitialize={true}
-                initialValues={{ text: "", image: image }}
+                initialValues={{ text: "", file: null }}
                 onSubmit={async (values, { resetForm }) => {
-                    const {error} = await createPost(
-                        { input: values }
-                    );
+                    await createPost({ 
+                        text: values.text, 
+                        file: values.file
+                    });
                     resetForm({});
-                    if(!error) router.push('/');
+                    setCreateObjectURL('');
+                    router.push('/');
                 }}
             >
-            {({ isSubmitting }) => (
+            {({ isSubmitting, setFieldValue }) => (
                 <Form className="tweet-form">
                     <div className="tweet-form__wrapper">
                         <img
@@ -85,7 +65,12 @@ export const TweetForm: React.FC<TweetFormProps> = ({ authUserData }) => {
                     </div>
                     <div className="tweet-form__btns">
                         <button className="tweet-img__btn cursor-default" type="button">
-                            <input className="opacity-zero" type="file" onChange={uploadToClient}/>
+                            <FileInput className="opacity-zero" name="file" type="file" value={undefined}onChange={
+                                (e: any) => { 
+                                    createPreviewImage(e); 
+                                    setFieldValue("file", e!.target!.files![0]);
+                                }
+                            }/>
                         </button>
                         <Button 
                             isLoading={ isSubmitting } 
