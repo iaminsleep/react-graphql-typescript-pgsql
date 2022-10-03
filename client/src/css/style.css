@@ -369,9 +369,12 @@ button {
 	color: rgb(15, 20, 25);
 	border: 2px solid rgba(26, 145, 218, 0.1);
 	border-radius: 5px;
-	margin-left: 20px;
 	outline: none;
 	resize: none;
+}
+
+.margin-top-twenty {
+	margin-top: 20px;
 }
 
 .tweet-form__text:focus {
@@ -502,6 +505,10 @@ button {
 .tweet__footer {
 	display: flex;
 	justify-content: flex-end;
+}
+
+.margin-left-twenty {
+	margin-left: 20px;
 }
 
 .tweet__like {

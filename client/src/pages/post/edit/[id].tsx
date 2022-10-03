@@ -12,10 +12,14 @@ import { useGetPostFromUrl } from "../../../utils/useGetPostFromUrl";
 import { AuthModal } from '../../../components/AuthModal';
 import { TextareaInput } from '../../../components/TextareaInput';
 import { useState } from 'react'; 
+import { FileInput } from '../../../components/FileInput';
+import Head from 'next/head';
 
 export const EditPost = ({}) => {
     const router = useRouter();
     const intId = useGetIntId();
+    const [createObjectURL, setCreateObjectURL] = useState('');
+    const [showImage, setShowImage] = useState(true);
 
     const [{ data, fetching }] = useGetPostFromUrl();
     const [, updatePost ] = useUpdatePostMutation();
@@ -54,46 +58,99 @@ export const EditPost = ({}) => {
             </Layout>
         )
     }
+
+    const createPreviewImage = (e: React.ChangeEvent<any>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+
+            if(!file) return false;
+
+            setCreateObjectURL(URL.createObjectURL(file));
+
+            return file;
+        }
+    }
     
     return (
         <Layout openModal={openModal}>
+            <Head>
+                <title>Edit your post</title>
+            </Head>
             <Formik
                 initialValues={{ 
                     text: data.post.text,
-                    image: data.post.image
                 }}
-                onSubmit={async (values) => {
+                onSubmit={async (values, { resetForm }) => {
                     const { error } = await updatePost(
                         {id: intId, ...values}
                     );
-                    if(!error) router.push('/');
-                    router.back();
+                    if(!error) { 
+                        router.back();
+                        resetForm({});
+                    }
                 }}
             >
-                {({ isSubmitting }) => (
+                {({ isSubmitting, setFieldValue }) => (
                     <Form>
                         <div className="paddingeighty">
                             <h2 className="tweet-form__title">Edit Post</h2>
-                            <Box mt={4} display="flex" margin="0 auto">
+                            <Box mt={4} display="flex" flexDirection="column" margin="0 auto">
                                 <TextareaInput
-                                    className="tweet-form__text"
+                                    className="tweet-form__text margin-left-twenty"
                                     name="text"
                                     rows={Number("4")}
                                     placeholder="What is happening?"
                                     required
                                 />
-                            </Box>
-                            { data!.post!.image
-                                ?   <a href={`${process.env.PUBLIC_URL}/img/post/${data!.post!.image}`} target="_blank">
-                                            <Image 
-                                                fallback={
-                                                    <img src={`${process.env.PUBLIC_URL}/img/no_image.jpg`} alt="no_image"/>
-                                                } 
-                                                src={`${process.env.PUBLIC_URL}/img/post/${data!.post!.image}`}
+                                { data!.post!.image
+                                    ?   <>
+                                            <a 
+                                                href={`${process.env.PUBLIC_URL}/img/post/${data!.post!.image}`} 
+                                                className="margin-left-twenty margin-top-twenty" 
+                                                target="_blank"
+                                            >
+                                                { showImage 
+                                                    ?   <Image 
+                                                            fallback={
+                                                                <img src={createObjectURL ? createObjectURL : `${process.env.PUBLIC_URL}/img/no_image.jpg`} alt="no_image"/>
+                                                            } 
+                                                            src={`${createObjectURL ?? process.env.PUBLIC_URL}/img/post/${data!.post!.image}`}
+                                                        />
+                                                    : null
+                                                }
+                                            </a>
+                                            <button 
+                                                onClick={(e) => { 
+                                                    e.preventDefault(); 
+                                                    setFieldValue("file", null);
+                                                    setShowImage(false);
+                                                }} 
+                                                className="tweet__delete-button chest-icon"
                                             />
-                                    </a>
-                                : null
-                            }
+                                        </>
+                                    :   
+                                        createObjectURL
+                                        ?   <>
+                                                <a className="margin-left-twenty margin-top-twenty" href={createObjectURL} target="_blank">
+                                                    <img src={createObjectURL}/>
+                                                </a>
+                                                <button 
+                                                    onClick={() => setCreateObjectURL('')} 
+                                                    className="tweet__delete-button chest-icon"
+                                                />
+                                            </>
+                                        :   null
+                                        
+                                }
+                                <button className="tweet-img__btn cursor-default margin-left-twenty margin-top-twenty" type="button">
+                                    <FileInput className="opacity-zero" name="file" type="file" value={undefined} onChange={
+                                        (e: any) => { 
+                                            createPreviewImage(e); 
+                                            setFieldValue("file", e!.target!.files![0]);
+                                        }
+                                    }/>
+                                </button>
+                            </Box>
                             <Button
                                 mt={4}
                                 type="submit"

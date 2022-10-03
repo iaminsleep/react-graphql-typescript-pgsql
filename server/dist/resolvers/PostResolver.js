@@ -24,6 +24,7 @@ const User_1 = require("../entities/User");
 const graphql_upload_1 = require("graphql-upload");
 const path_1 = __importDefault(require("path"));
 const promises_1 = require("stream/promises");
+const fs_1 = __importDefault(require("fs"));
 let PaginatedPosts = class PaginatedPosts {
 };
 __decorate([
@@ -123,7 +124,7 @@ let PostResolver = class PostResolver {
             newFilename = generateRandomString(12) + ext;
             const stream = createReadStream();
             const pathName = path_1.default.join(__dirname, `../../../client/public/img/post/${newFilename}`);
-            const out = require('fs').createWriteStream(pathName);
+            const out = fs_1.default.createWriteStream(pathName);
             stream.pipe(out);
             await (0, promises_1.finished)(out);
         }
@@ -134,17 +135,38 @@ let PostResolver = class PostResolver {
             creatorId: req.session.userId
         }).save();
     }
-    async updatePost(id, text, image, { req }) {
+    async updatePost(id, text, file, { req }) {
         const post = await Post_1.Post.findOne({ where: { id } });
         if (!post)
             return null;
         else if (typeof text === 'undefined')
             return null;
         else {
+            let newFilename = null;
+            if (typeof file !== 'undefined' && file !== null) {
+                const { createReadStream, filename } = file;
+                const { ext } = path_1.default.parse(filename);
+                newFilename = generateRandomString(12) + ext;
+                const stream = createReadStream();
+                const pathName = path_1.default.join(__dirname, `../../../client/public/img/post/${newFilename}`);
+                const out = require('fs').createWriteStream(pathName);
+                stream.pipe(out);
+                await (0, promises_1.finished)(out);
+                if (post.image) {
+                    const pathName = path_1.default.join(__dirname, `../../../client/public/img/post/${post.image}`);
+                    fs_1.default.unlinkSync(pathName);
+                }
+            }
+            else if (file === null && typeof file !== 'undefined' && post.image) {
+                const pathName = path_1.default.join(__dirname, `../../../client/public/img/post/${post.image}`);
+                fs_1.default.unlinkSync(pathName);
+            }
             const queryResult = await typeorm_data_source_1.AppDataSource
                 .createQueryBuilder()
                 .update(Post_1.Post)
-                .set({ text, image })
+                .set({ text, image: (file === null ? null :
+                    newFilename !== null ? newFilename :
+                        file === undefined && newFilename === null ? post.image : null) })
                 .where('id = :id and "creatorId" = :creatorId', {
                 id, creatorId: req.session.userId
             })
@@ -155,6 +177,13 @@ let PostResolver = class PostResolver {
     }
     async deletePost(id, { req }) {
         const currentUserId = req.session.userId;
+        const post = await Post_1.Post.findOne({ where: { id } });
+        if (!post)
+            return false;
+        if (post.image) {
+            const pathName = path_1.default.join(__dirname, `../../../client/public/img/post/${post.image}`);
+            fs_1.default.unlinkSync(pathName);
+        }
         await Post_1.Post.delete({
             id,
             creatorId: currentUserId
@@ -225,10 +254,10 @@ __decorate([
     (0, type_graphql_1.UseMiddleware)(isAuth_1.isAuth),
     __param(0, (0, type_graphql_1.Arg)('id', () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Arg)('text')),
-    __param(2, (0, type_graphql_1.Arg)('image', { nullable: true })),
+    __param(2, (0, type_graphql_1.Arg)('file', () => graphql_upload_1.GraphQLUpload, { nullable: true })),
     __param(3, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String, String, Object]),
+    __metadata("design:paramtypes", [Number, String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "updatePost", null);
 __decorate([

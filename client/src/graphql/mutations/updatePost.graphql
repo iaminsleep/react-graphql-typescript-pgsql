@@ -1,5 +1,5 @@
-mutation UpdatePost($id: Int!, $image: String, $text: String!) {
-    updatePost(id: $id, image: $image, text: $text) {
+mutation UpdatePost($id: Int!, $file: Upload, $text: String!) {
+    updatePost(id: $id, file: $file, text: $text) {
         id
         createdAt
         updatedAt

@@ -56,7 +56,7 @@ export const TweetForm: React.FC<TweetFormProps> = ({ authUserData }) => {
                             alt="Avatar"
                         />
                         <TextareaInput
-                            className="tweet-form__text"
+                            className="tweet-form__text margin-left-twenty"
                             name="text"
                             rows={Number("4")}
                             placeholder="What is happening?"
@@ -65,7 +65,7 @@ export const TweetForm: React.FC<TweetFormProps> = ({ authUserData }) => {
                     </div>
                     <div className="tweet-form__btns">
                         <button className="tweet-img__btn cursor-default" type="button">
-                            <FileInput className="opacity-zero" name="file" type="file" value={undefined}onChange={
+                            <FileInput className="opacity-zero" name="file" type="file" value={undefined} onChange={
                                 (e: any) => { 
                                     createPreviewImage(e); 
                                     setFieldValue("file", e!.target!.files![0]);

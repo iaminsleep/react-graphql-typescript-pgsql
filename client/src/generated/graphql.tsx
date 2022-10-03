@@ -81,8 +81,8 @@ export type MutationRegisterArgs = {
 
 
 export type MutationUpdatePostArgs = {
+  file?: InputMaybe<Scalars['Upload']>;
   id: Scalars['Int'];
-  image?: InputMaybe<Scalars['String']>;
   text: Scalars['String'];
 };
 
@@ -230,7 +230,7 @@ export type RegisterMutation = { __typename?: 'Mutation', register: { __typename
 
 export type UpdatePostMutationVariables = Exact<{
   id: Scalars['Int'];
-  image?: InputMaybe<Scalars['String']>;
+  file?: InputMaybe<Scalars['Upload']>;
   text: Scalars['String'];
 }>;
 
@@ -408,8 +408,8 @@ export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
 };
 export const UpdatePostDocument = gql`
-    mutation UpdatePost($id: Int!, $image: String, $text: String!) {
-  updatePost(id: $id, image: $image, text: $text) {
+    mutation UpdatePost($id: Int!, $file: Upload, $text: String!) {
+  updatePost(id: $id, file: $file, text: $text) {
     id
     createdAt
     updatedAt

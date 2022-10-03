@@ -7,6 +7,7 @@ import { User } from "../entities/User";
 import { FileUpload, GraphQLUpload } from "graphql-upload";
 import path from 'path';
 import { finished } from 'stream/promises';
+import fs from 'fs';
 
 @ObjectType()
 class PaginatedPosts {
@@ -160,7 +161,7 @@ export class PostResolver {
 
             const pathName = path.join(__dirname, `../../../client/public/img/post/${newFilename}`);
 
-            const out = require('fs').createWriteStream(pathName);
+            const out = fs.createWriteStream(pathName);
             stream.pipe(out);
             await finished(out);
         }
@@ -178,17 +179,47 @@ export class PostResolver {
     async updatePost(
         @Arg('id', () => Int) id: number,
         @Arg('text') text: string,
-        @Arg('image', { nullable: true }) image: string, // if you want to make this field nullable
+        @Arg('file', () => GraphQLUpload, { nullable: true }) file: FileUpload,
         @Ctx() { req }: MyContext
     ): Promise<Post | null> {
         const post = await Post.findOne({ where: {id} });
         if(!post) return null;
+
         else if(typeof text === 'undefined') return null;
+
         else {
+            let newFilename = null;
+            
+            if(typeof file !== 'undefined' && file !== null) {
+                const { createReadStream, filename } = file;
+
+                const { ext } = path.parse(filename);
+                newFilename = generateRandomString(12) + ext;
+                const stream = createReadStream();
+
+                const pathName = path.join(__dirname, `../../../client/public/img/post/${newFilename}`);
+
+                const out = require('fs').createWriteStream(pathName);
+                stream.pipe(out);
+                await finished(out);
+
+                if(post.image) {
+                    const pathName = path.join(__dirname, `../../../client/public/img/post/${post.image}`);
+                    fs.unlinkSync(pathName);
+                }
+            } else if (file === null && typeof file !== 'undefined' && post.image) {
+                const pathName = path.join(__dirname, `../../../client/public/img/post/${post.image}`);
+                fs.unlinkSync(pathName);
+            }
+
             const queryResult = await AppDataSource
                 .createQueryBuilder()
                 .update(Post)
-                .set({ text, image })
+                .set({ text, image: ( 
+                        file === null ? null :
+                        newFilename !== null ? newFilename : 
+                        file === undefined && newFilename === null ? post.image : null
+                    )})
                 .where('id = :id and "creatorId" = :creatorId', { 
                     id, creatorId: req.session.userId 
                 })
@@ -204,10 +235,21 @@ export class PostResolver {
         @Arg('id', () => Int) id: number, // make that int
         @Ctx() { req }: MyContext, 
     ): Promise<boolean> {
-        /** Without these codes you'll get a constaint error! */
-
         const currentUserId = req.session.userId;
-        /** NOT CASCADE WAY OF DELETING */
+
+        const post = await Post.findOne({ where: {id} });
+
+        if(!post) return false;
+
+        if(post.image) {
+            const pathName = path.join(__dirname, `../../../client/public/img/post/${post.image}`);
+            fs.unlinkSync(pathName);
+        }
+        
+        /** Without these codes you'll get a constraint error! */
+
+        /** NON CASCADE WAY OF DELETING */
+
         // const post = await Post.findOne({where: {id}});
         // if(!post) return false;
         // else if(post.creatorId !== currentUserId) {
@@ -220,11 +262,12 @@ export class PostResolver {
         //     await Post.delete(id);
         // }
 
-        /** CASCADE WAY OF DELETING (Upvote gets deleted automatically, to activate this go to Upvote model) */
+        /** CASCADE WAY OF DELETING (likes get deleted automatically, to activate this go to Like model) */
         await Post.delete({
             id, 
             creatorId: currentUserId
         });
+        
         return true;
     }
 }
