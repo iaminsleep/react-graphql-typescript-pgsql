@@ -44,7 +44,7 @@ export const Post = ({}) => {
             </Head>
             <TweetPage key={data?.post.id} post={data?.post} openModal={openModal}/>
             { isModalOpen 
-                ? <AuthModal closeModal={closeModal}></AuthModal>
+                ? <AuthModal closeModal={closeModal}/>
                 : ''
             }
         </Layout>
@@ -57,4 +57,4 @@ export const Post = ({}) => {
 //     } another way instead of using 'router.query.token'
 // }
 
-export default withUrqlClient(createUrqlClient, {ssr: true})(Post);
+export default withUrqlClient(createUrqlClient)(Post);

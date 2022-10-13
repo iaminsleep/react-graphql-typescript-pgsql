@@ -73,13 +73,16 @@ export const User = ({}) => {
                         <img
                             className="avatar avatar-profile"
                             src={ data.user.avatar 
-                                ? `${process.env.PUBLIC_URL}/img/avatar.png` 
+                                ? `${process.env.PUBLIC_URL}/img/${data.user.avatar}` 
                                 : `${process.env.PUBLIC_URL}/img/no_avatar.png`
                             }
                             alt={`${data.user.login}'s avatar`}
                         />
                         { meData?.data?.me?.id === data.user.id
-                            ?   <Button variant="secondary" onClick={() => router.push('/settings')}>
+                            ?   <Button variant="secondary" onClick={() => router.push({ 
+                                    pathname: '/settings', 
+                                    query: { userId: data?.user?.id}})}
+                                >
                                     Edit profile
                                 </Button>
                             : null

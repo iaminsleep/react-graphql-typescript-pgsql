@@ -1,0 +1,13 @@
+Server:
+1) Git Bash Console
+ ./serverdev.sh
+2) Git Bash Console 
+./serverwatch.sh
+
+Client:
+1) Git Bash Console
+./clientdev.sh
+
+Redis-server:
+3) WSL Console (Ubuntu)
+redis-server

@@ -24,59 +24,59 @@ export const TweetPage: React.FC<TweetProps> = ({ openModal, post }) => {
 
     return (
         <article className="tweet">
-                <div className="cursor-pointer">
-                    <div className="row">
-                        <Link href={`/user/${post.creator.id}`}>
-                            <img
-                                className="avatar"
-                                src={ post.creator.avatar 
-                                    ? `${process.env.PUBLIC_URL}/img/no_avatar.png` 
-                                    : `${process.env.PUBLIC_URL}/img/no_avatar.png`
-                                }
-                                alt={`${post.creator.login}'s avatar`}
-                            />
-                        </Link>
-                        <div className="tweet__wrapper">
-                            <header className="tweet__header">
-                                <Link href={`/user/${post.creator.id}`}>
-                                    <div className="tweet_div">
-                                        <h3 className="tweet-author">
-                                            { post.creator.username ?? post.creator.login }
-                                        </h3>
-                                        <p className="tweet-author__add tweet-author__nickname">
-                                            @{ post.creator.login }
-                                        </p>
-                                    </div>
-                                </Link>
-                                { authUserData?.me?.id === post.creator.id && 
-                                    <PostButtons postId={post.id}/>
-                                }
-                            </header>
-                            <div className="tweet-post">
-                                <p className="tweet-post__text">
-                                    { post.text }
-                                </p>
-                                { post.image
-                                    ? 
-                                        <a href={`${process.env.PUBLIC_URL}/img/post/${post.image}`} target="_blank">
-                                            <figure className="tweet-post__image">
-                                                <Image 
-                                                    fallback={
-                                                        <img src={`${process.env.PUBLIC_URL}/img/no_image.jpg`} alt="no_image"/>
-                                                    } 
-                                                    src={`${process.env.PUBLIC_URL}/img/post/${post.image}`}
-                                                />
-                                            </figure>
-                                        </a>
-                                    : null
-                                }
-                                <time className="tweet-author__add tweet__date">
-                                    { post.postCreationDateString }
-                                </time>
-                            </div>
+            <div className="cursor-pointer">
+                <div className="row">
+                    <Link href={`/user/${post.creator.id}`}>
+                        <img
+                            className="avatar"
+                            src={ post.creator.avatar 
+                                ? `${process.env.PUBLIC_URL}/img/no_avatar.png` 
+                                : `${process.env.PUBLIC_URL}/img/no_avatar.png`
+                            }
+                            alt={`${post.creator.login}'s avatar`}
+                        />
+                    </Link>
+                    <div className="tweet__wrapper">
+                        <header className="tweet__header">
+                            <Link href={`/user/${post.creator.id}`}>
+                                <div className="tweet_div">
+                                    <h3 className="tweet-author">
+                                        { post.creator.username ?? post.creator.login }
+                                    </h3>
+                                    <p className="tweet-author__add tweet-author__nickname">
+                                        @{ post.creator.login }
+                                    </p>
+                                </div>
+                            </Link>
+                            { authUserData?.me?.id === post.creator.id && 
+                                <PostButtons postId={post.id}/>
+                            }
+                        </header>
+                        <div className="tweet-post">
+                            <p className="tweet-post__text">
+                                { post.text }
+                            </p>
+                            { post.image
+                                ? 
+                                    <a href={`${process.env.PUBLIC_URL}/img/post/${post.image}`} target="_blank">
+                                        <figure className="tweet-post__image">
+                                            <Image 
+                                                fallback={
+                                                    <img src={`${process.env.PUBLIC_URL}/img/no_image.jpg`} alt="no_image"/>
+                                                } 
+                                                src={`${process.env.PUBLIC_URL}/img/post/${post.image}`}
+                                            />
+                                        </figure>
+                                    </a>
+                                : null
+                            }
+                            <time className="tweet-author__add tweet__date">
+                                { post.postCreationDateString }
+                            </time>
                         </div>
                     </div>
                 </div>
+            </div>
             <footer>
                 <button 
                     onClick={ 

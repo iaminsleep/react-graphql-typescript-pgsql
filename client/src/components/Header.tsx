@@ -35,7 +35,6 @@ export const Header: React.FC<HeaderProps> = ({ openModal, authUserData }) => {
                                 className="header__link header__link_exit"
                                 onClick={async () => {
                                     await logout();
-                                    router.reload();
                                 }}/>
                             }
                         </li>

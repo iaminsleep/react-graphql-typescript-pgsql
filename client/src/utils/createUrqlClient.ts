@@ -17,7 +17,7 @@ const errorExchange: Exchange = ({ forward }) => ops$ => {
             if(error) {
                 // the error is a CombinedError with networkError and graphqlErrors properties
                 if(error?.message.includes("not authenticated")) {
-                    Router.replace('/login');
+                    Router.replace('/');
                 }
             }
         })
@@ -171,18 +171,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any): any => {
                         invalidateAllPosts(cache);
                     },
                     register: (_result: RegisterMutation, args, cache, info) => {
-                        betterUpdateQuery<RegisterMutation, MeQuery>(
-                            cache,
-                            { query: MeDocument },
-                            _result,
-                            (result, query) => {
-                                if(result.register.errors) {
-                                    return query;
-                                } else {
-                                    return { me: result.register.user };
-                                }
-                            }
-                        )
+                        invalidateAllPosts(cache);
                     },
                     logout: (_result, args, cache, info) => {
                         // MeQuery
@@ -192,6 +181,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any): any => {
                             _result,
                             () => ({ me: null })
                         ); // this should make listeners think that current user is null
+                        invalidateAllPosts(cache);
                     }
                 },
             }

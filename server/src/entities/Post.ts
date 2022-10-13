@@ -34,7 +34,7 @@ export class Post extends BaseEntity
   @Column()
   creatorId: number; // allow many to one relationship
 
-  @Field()
+  @Field(() => User)
   @ManyToOne(() => User, (user) => user.posts, {
       onDelete: "CASCADE", // if user is deleted it'll delete every post that was created by him
   })

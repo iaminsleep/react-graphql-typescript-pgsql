@@ -42,15 +42,6 @@ const Index = () => {
   const [ meData ] = useMeQuery({
       pause: isServerRendered, // if you don't want to run query on the server
   }); // so, the logout mutation cache update in _app.tsx makes it very convinient to delete username from everywhere, because MeQuery reusult will be equal to null
-  
-
-  if(!fetching && !data && !error) {
-    return <div>There are no posts yet</div>;
-  }
-
-  if(error) {
-    return <div>{error?.message}</div>;
-  }
 
   return (
     <Layout openModal={openModal}>
@@ -64,14 +55,22 @@ const Index = () => {
       {/* if data is true, the posts are going to show. */}
       {!data && fetching ? (
         <div>Loading...</div>
+      ) : null }
+
+      {error ? (
+        <div>{error?.message}</div>
+      ) : null }
+
+      {!fetching && !data?.posts.posts.length && !error ? (
+        <div className="empty-posts">There are no posts yet.</div>
       ) : (
         <ul className="tweet-list">
-          {data!.posts.posts.map((post) => // ! exclamation point tells us that data variable is definitely going to have data
+          {data?.posts.posts.map((post) => // ! exclamation point tells us that data variable is definitely going to have data
             !post 
               ? null 
               : // some posts may be null, so we use this to not show already deleted post, otherwise they throw an error. it is used for invalidating cache
           ( 
-            <Tweet key={post.id} post={post} openModal={openModal}></Tweet>
+            <Tweet key={post.id} post={post} openModal={openModal}/>
           ))}
         </ul>    
       )}

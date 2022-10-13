@@ -595,6 +595,27 @@ button {
 	display: flex;
 }
 
+.edit-post-btns {
+	display: flex;
+	justify-content: space-between;
+}
+
+.alignCenter {
+	display: flex;
+	align-items: center;
+}
+
+.empty-posts {
+	padding-top: 300px;
+	padding-bottom: 300px;
+	justify-content: center;
+	display: flex;
+}
+
+.width-fifty-px {
+	width: 50px;
+}
+
 .edit-icon {
 	width: 17px;
 	background-image: url("../../public/img/edit-button.png");

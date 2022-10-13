@@ -38,6 +38,7 @@ export type Mutation = {
   logout: Scalars['Boolean'];
   register: UserResponse;
   updatePost: Post;
+  updateUser: UserResponse;
   uploadFile: FileResponse;
 };
 
@@ -84,6 +85,13 @@ export type MutationUpdatePostArgs = {
   file?: InputMaybe<Scalars['Upload']>;
   id: Scalars['Int'];
   text: Scalars['String'];
+};
+
+
+export type MutationUpdateUserArgs = {
+  email?: InputMaybe<Scalars['String']>;
+  file?: InputMaybe<Scalars['Upload']>;
+  username?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -236,6 +244,15 @@ export type UpdatePostMutationVariables = Exact<{
 
 
 export type UpdatePostMutation = { __typename?: 'Mutation', updatePost: { __typename?: 'Post', id: number, createdAt: string, updatedAt: string, image?: string | null, text: string, textSnippet: string } };
+
+export type UpdateUserMutationVariables = Exact<{
+  username?: InputMaybe<Scalars['String']>;
+  email?: InputMaybe<Scalars['String']>;
+  file?: InputMaybe<Scalars['Upload']>;
+}>;
+
+
+export type UpdateUserMutation = { __typename?: 'Mutation', updateUser: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', id: number, login: string, username?: string | null, avatar?: string | null, createdAt: string } | null } };
 
 export type GetPostQueryVariables = Exact<{
   id: Scalars['Int'];
@@ -422,6 +439,17 @@ export const UpdatePostDocument = gql`
 
 export function useUpdatePostMutation() {
   return Urql.useMutation<UpdatePostMutation, UpdatePostMutationVariables>(UpdatePostDocument);
+};
+export const UpdateUserDocument = gql`
+    mutation UpdateUser($username: String, $email: String, $file: Upload) {
+  updateUser(username: $username, email: $email, file: $file) {
+    ...RegularUserResponse
+  }
+}
+    ${RegularUserResponseFragmentDoc}`;
+
+export function useUpdateUserMutation() {
+  return Urql.useMutation<UpdateUserMutation, UpdateUserMutationVariables>(UpdateUserDocument);
 };
 export const GetPostDocument = gql`
     query GetPost($id: Int!) {

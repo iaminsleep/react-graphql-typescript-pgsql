@@ -9,7 +9,6 @@ interface TweetProps {
     post: PostPreviewSnippetFragment;
 }
 
-
 export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
     const [{ data: authUserData }] = useMeQuery();
     const [, like] = useLikeMutation();
@@ -33,7 +32,7 @@ export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
                                 <img
                                     className="avatar"
                                     src={ post.creator.avatar 
-                                        ? `${process.env.PUBLIC_URL}/img/no_avatar.png` 
+                                        ? `${process.env.PUBLIC_URL}/img/${post.creator.avatar}`
                                         : `${process.env.PUBLIC_URL}/img/no_avatar.png`
                                     }
                                     alt={`${post.creator.login}'s avatar`}
@@ -52,7 +51,7 @@ export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
                                         </div>
                                     </Link>
                                     { authUserData?.me?.id === post.creator.id && 
-                                        <PostButtons postId={post.id}/>
+                                        <PostButtons postId={post.id} postCreatorId={post.creator.id}/>
                                     }
                                 </header>
                                 <div className="tweet-post">

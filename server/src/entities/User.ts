@@ -22,17 +22,17 @@ export class User extends BaseEntity
   @Column({ unique: true })
   login!: string;
 
-  @Column() // deletion of @Field property makes impossible to select password (for the security matter)
+  @Column() // deletion of @Field property makes impossible to select password (imporves security)
   password!: string;
 
   @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  username: string;
+  @Column({ type: "text", nullable: true })
+  username: string | null;
 
   @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  avatar: string;
-
+  @Column({ type: "varchar", nullable: true })
+  avatar: string | null;
+  
   @OneToMany(() => Post, (post) => post.creator)
   posts: Post[];
 

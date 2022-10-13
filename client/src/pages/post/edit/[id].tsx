@@ -1,11 +1,11 @@
 // folder/[filename].tsx === route/queryname=value
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Button } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import { withUrqlClient } from "next-urql";
 import { useRouter } from "next/router";
 import { Layout } from "../../../components/Layout";
-import { useUpdatePostMutation } from "../../../generated/graphql";
+import { useMeQuery, useUpdatePostMutation } from "../../../generated/graphql";
 import { createUrqlClient } from "../../../utils/createUrqlClient";
 import { useGetIntId } from "../../../utils/useGetIntId";
 import { useGetPostFromUrl } from "../../../utils/useGetPostFromUrl";
@@ -14,14 +14,35 @@ import { TextareaInput } from '../../../components/TextareaInput';
 import { useState } from 'react'; 
 import { FileInput } from '../../../components/FileInput';
 import Head from 'next/head';
+import { isServer } from '../../../utils/isServer';
 
 export const EditPost = ({}) => {
     const router = useRouter();
+
+    const [isServerRendered, setIsServerRendered] = useState(false);
+    useEffect(() => {
+        if(isServer()) {
+            setIsServerRendered(true);
+        }
+    });
+    
+    const [{ data, fetching }] = useGetPostFromUrl();
     const intId = useGetIntId();
+    const [ meData ] = useMeQuery({
+        pause: isServerRendered, // if you don't want to run query on the server
+    }); // so, the logout mutation cache update in _app.tsx makes it very convinient to delete username from everywhere, because MeQuery reusult will be equal to null
+
+    useEffect(() => {
+        const creatorId = parseInt(router?.query?.postCreatorId as string);
+        
+        if(meData?.data?.me?.id !== creatorId) {
+            router.push('/');
+        } //some sort of middleware
+    });
+
     const [createObjectURL, setCreateObjectURL] = useState('');
     const [showImage, setShowImage] = useState(true);
 
-    const [{ data, fetching }] = useGetPostFromUrl();
     const [, updatePost ] = useUpdatePostMutation();
 
     const Image = ({ src, alt, fallback }: any) => {
@@ -119,14 +140,6 @@ export const EditPost = ({}) => {
                                                     : null
                                                 }
                                             </a>
-                                            <button 
-                                                onClick={(e) => { 
-                                                    e.preventDefault(); 
-                                                    setFieldValue("file", null);
-                                                    setShowImage(false);
-                                                }} 
-                                                className="tweet__delete-button chest-icon"
-                                            />
                                         </>
                                     :   
                                         createObjectURL
@@ -134,22 +147,45 @@ export const EditPost = ({}) => {
                                                 <a className="margin-left-twenty margin-top-twenty" href={createObjectURL} target="_blank">
                                                     <img src={createObjectURL}/>
                                                 </a>
-                                                <button 
-                                                    onClick={() => setCreateObjectURL('')} 
-                                                    className="tweet__delete-button chest-icon"
-                                                />
                                             </>
                                         :   null
                                         
                                 }
-                                <button className="tweet-img__btn cursor-default margin-left-twenty margin-top-twenty" type="button">
-                                    <FileInput className="opacity-zero" name="file" type="file" value={undefined} onChange={
-                                        (e: any) => { 
-                                            createPreviewImage(e); 
-                                            setFieldValue("file", e!.target!.files![0]);
-                                        }
-                                    }/>
-                                </button>
+                                <div className="margin-left-twenty margin-top-twenty edit-post-btns">
+                                    <button className="tweet-img__btn cursor-default" type="button">
+                                        <FileInput className="opacity-zero width-fifty-px" name="file" type="file" value={undefined} 
+                                            onChange={
+                                                (e: any) => { 
+                                                    createPreviewImage(e); 
+                                                    setFieldValue("file", e!.target!.files![0]);
+                                                }
+                                        }/>
+                                    </button>
+                                    {   createObjectURL
+                                        ?   <div className="alignCenter">
+                                                <button 
+                                                    onClick={() => setCreateObjectURL('')} 
+                                                    className="tweet__delete-button chest-icon"
+                                                    title="Delete this photo"
+                                                />
+                                                <p>Delete the photo</p>
+                                            </div>
+                                        : data!.post!.image
+                                            ?   <div className="alignCenter">
+                                                    <button 
+                                                        onClick={(e) => { 
+                                                            e.preventDefault(); 
+                                                            setFieldValue("file", null);
+                                                            setShowImage(false);
+                                                        }} 
+                                                        className="tweet__delete-button chest-icon"
+                                                        title="Delete this photo"
+                                                    />
+                                                    <p>Delete the photo</p>
+                                                </div>
+                                        : null
+                                    }
+                                </div>
                             </Box>
                             <Button
                                 mt={4}

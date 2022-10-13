@@ -1,6 +1,6 @@
 import { User } from "../entities/User";
 import { MyContext } from "src/types";
-import { Arg, Ctx, Field, Int, Mutation, ObjectType, Query } from "type-graphql";
+import { Arg, Ctx, Field, FieldResolver, Int, Mutation, ObjectType, Query, Resolver, Root, UseMiddleware } from "type-graphql";
 import argon2 from "argon2";
 import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from "../constants";
 import { UsernamePasswordInput } from "../utils/UsernamePasswordInput";
@@ -8,6 +8,11 @@ import { validateRegister } from "../utils/validateRegister";
 import { sendEmail } from "../utils/sendEmail";
 import { v4 } from 'uuid';
 import { AppDataSource } from "../typeorm-data-source"; // config
+import { FileUpload, GraphQLUpload } from "graphql-upload";
+import { isAuth } from "../middleware/isAuth";
+import path from 'path';
+import { finished } from 'stream/promises';
+import fs from 'fs';
 
 @ObjectType() // GraphQL object
 class FieldError {
@@ -26,18 +31,28 @@ class UserResponse {
     user?: User;
 }
 
-// @Resolver(User)
+function generateRandomString(length: number) {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
+@Resolver(User)
 export class UserResolver {
-    // // Field Resolver logic to not show users emails when fetching posts and getting the creator
-    // @FieldResolver(() => String)
-    // email(@Root() user: User, @Ctx() { req }: MyContext) {
-    //     // if this is the current user then it's okay to show them their own email
-    //     if(req.session.userId && req.session.userId === user.id) {
-    //         return user.email;
-    //     }
-    //     // current user wants to see someone else's email
-    //     return "";
-    // }
+    // Field Resolver logic to not show users emails when fetching posts and getting the creator
+    @FieldResolver(() => String)
+    email(@Root() user: User, @Ctx() { req }: MyContext) {
+        // if this is the current user then it's okay to show them their own email
+        if(req.session.userId && req.session.userId === user.id) {
+            return user.email;
+        }
+        // prevents from user see someone else's email
+        return "";
+    }
 
     @Query(() => User, { nullable: true })
     user(
@@ -79,11 +94,6 @@ export class UserResolver {
             }).returning('*').execute(); // returning * clause to return user object
             user = result.raw[0]; // the whole code here is if you want to use query builder instead of easy User.create({email: options.email,username: options.username,password: hashedPassword}) function
 
-            // const user = em.create(User, {
-            //     email: options.email,
-            //     username: options.username,
-            //     password: hashedPassword
-            // }); MIKRO-ORM EQUIVALENT
         } catch (err) {
             // duplicate username error
             if(err.code === '23505') return  {
@@ -131,6 +141,7 @@ export class UserResolver {
     }
 
     @Mutation(() => Boolean)
+    @UseMiddleware(isAuth)
     async logout(
         @Ctx() { req, res }: MyContext
     ) {
@@ -148,6 +159,63 @@ export class UserResolver {
                 resolve(true);
             })
         );
+    }
+
+    @Mutation(() => UserResponse)
+    @UseMiddleware(isAuth)
+    async updateUser(
+        @Arg('username', { nullable: true }) username: string,
+        @Arg('email', { nullable: true }) email: string,
+        @Arg('file', () => GraphQLUpload, { nullable: true }) file: FileUpload,
+        @Ctx() { req }: MyContext,
+    ): Promise<UserResponse> {
+        const user = await User.findOne({ where: { id: req.session.userId } });
+        if(!user) return {
+            errors: [{
+                field: 'login',
+                message: "User not found.",
+            }]
+        };
+
+        let newFilename = null;
+            
+        if(typeof file !== 'undefined' && file !== null) {
+            const { createReadStream, filename } = file;
+
+            const { ext } = path.parse(filename);
+            newFilename = generateRandomString(12) + ext;
+            const stream = createReadStream();
+
+            const pathName = path.join(__dirname, `../../../client/public/img/post/${newFilename}`);
+
+            const out = require('fs').createWriteStream(pathName);
+            stream.pipe(out);
+            await finished(out);
+
+            if(user.avatar) {
+                const pathName = path.join(__dirname, `../../../client/public/img/post/${user.avatar}`);
+                fs.unlinkSync(pathName);
+            }
+        } else if (file === null && typeof file !== 'undefined' && user.avatar) {
+            const pathName = path.join(__dirname, `../../../client/public/img/post/${user.avatar}`);
+            fs.unlinkSync(pathName);
+        }
+
+        const queryResult = await AppDataSource
+            .createQueryBuilder()
+            .update(User)
+            .set({  username, email,
+                    avatar: ( 
+                        file === null ? null :
+                        newFilename !== null ? newFilename : 
+                        file === undefined && newFilename === null ? user.avatar : null
+                    )})
+            .where('id = :id', { 
+                id: req.session.userId 
+            })
+            .returning("*") // return post after query exec
+            .execute();
+        return queryResult.raw[0] as UserResponse;
     }
 
     @Mutation(() => Boolean)

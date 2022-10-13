@@ -18,5 +18,5 @@ export const AppDataSource = new DataSource({
     logging: true,
     synchronize: !__prod__, // synchronize: true migrates automatically at the start
     migrations: [path.join(__dirname, './migrations/*{.ts,.js}')],
-    entities: [Post, User, Like],
+    entities: [Like, Post, User],
 });

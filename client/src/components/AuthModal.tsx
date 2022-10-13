@@ -30,17 +30,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ closeModal }) => {
                     </div>
                     <Formik
                         initialValues={{ loginOrEmail: "", password: "" }}
-                        onSubmit={async (values, { setErrors }) => {
+                        onSubmit={async (values, { setErrors, resetForm }) => {
                             const response = await login(values);
                             if(response.data?.login.errors) // optional chaining allows to access deep nested properties 
                             {
                                 setErrors(toErrorMap(response.data.login.errors));
                             } else if(response.data?.login.user) {
                                 // worked
+                                resetForm({});
                                 if(typeof router.query.next === 'string') {
                                     router.push(router.query.next); // if next path is set in router query
-                                } else {            
-                                    router.push('/');
+                                } else {  
                                     closeModal();
                                 }
                             }

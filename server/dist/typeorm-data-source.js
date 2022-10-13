@@ -20,6 +20,6 @@ exports.AppDataSource = new typeorm_1.DataSource({
     logging: true,
     synchronize: !constants_1.__prod__,
     migrations: [path_1.default.join(__dirname, './migrations/*{.ts,.js}')],
-    entities: [Post_1.Post, User_1.User, Like_1.Like],
+    entities: [Like_1.Like, Post_1.Post, User_1.User],
 });
 //# sourceMappingURL=typeorm-data-source.js.map

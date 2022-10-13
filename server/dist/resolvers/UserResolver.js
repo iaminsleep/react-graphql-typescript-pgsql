@@ -25,6 +25,11 @@ const validateRegister_1 = require("../utils/validateRegister");
 const sendEmail_1 = require("../utils/sendEmail");
 const uuid_1 = require("uuid");
 const typeorm_data_source_1 = require("../typeorm-data-source");
+const graphql_upload_1 = require("graphql-upload");
+const isAuth_1 = require("../middleware/isAuth");
+const path_1 = __importDefault(require("path"));
+const promises_1 = require("stream/promises");
+const fs_1 = __importDefault(require("fs"));
 let FieldError = class FieldError {
 };
 __decorate([
@@ -51,7 +56,22 @@ __decorate([
 UserResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], UserResponse);
-class UserResolver {
+function generateRandomString(length) {
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+let UserResolver = class UserResolver {
+    email(user, { req }) {
+        if (req.session.userId && req.session.userId === user.id) {
+            return user.email;
+        }
+        return "";
+    }
     user(id) {
         return User_1.User.findOne({ where: { id: id } });
     }
@@ -120,6 +140,48 @@ class UserResolver {
             resolve(true);
         }));
     }
+    async updateUser(username, email, file, { req }) {
+        const user = await User_1.User.findOne({ where: { id: req.session.userId } });
+        if (!user)
+            return {
+                errors: [{
+                        field: 'login',
+                        message: "User not found.",
+                    }]
+            };
+        let newFilename = null;
+        if (typeof file !== 'undefined' && file !== null) {
+            const { createReadStream, filename } = file;
+            const { ext } = path_1.default.parse(filename);
+            newFilename = generateRandomString(12) + ext;
+            const stream = createReadStream();
+            const pathName = path_1.default.join(__dirname, `../../../client/public/img/post/${newFilename}`);
+            const out = require('fs').createWriteStream(pathName);
+            stream.pipe(out);
+            await (0, promises_1.finished)(out);
+            if (user.avatar) {
+                const pathName = path_1.default.join(__dirname, `../../../client/public/img/post/${user.avatar}`);
+                fs_1.default.unlinkSync(pathName);
+            }
+        }
+        else if (file === null && typeof file !== 'undefined' && user.avatar) {
+            const pathName = path_1.default.join(__dirname, `../../../client/public/img/post/${user.avatar}`);
+            fs_1.default.unlinkSync(pathName);
+        }
+        const queryResult = await typeorm_data_source_1.AppDataSource
+            .createQueryBuilder()
+            .update(User_1.User)
+            .set({ username, email,
+            avatar: (file === null ? null :
+                newFilename !== null ? newFilename :
+                    file === undefined && newFilename === null ? user.avatar : null) })
+            .where('id = :id', {
+            id: req.session.userId
+        })
+            .returning("*")
+            .execute();
+        return queryResult.raw[0];
+    }
     async forgotPassword(email, { redis }) {
         const user = await User_1.User.findOne({ where: { email: email } });
         if (!user) {
@@ -152,7 +214,15 @@ class UserResolver {
         req.session.userId = user.id;
         return { user };
     }
-}
+};
+__decorate([
+    (0, type_graphql_1.FieldResolver)(() => String),
+    __param(0, (0, type_graphql_1.Root)()),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [User_1.User, Object]),
+    __metadata("design:returntype", void 0)
+], UserResolver.prototype, "email", null);
 __decorate([
     (0, type_graphql_1.Query)(() => User_1.User, { nullable: true }),
     __param(0, (0, type_graphql_1.Arg)('id', () => type_graphql_1.Int)),
@@ -185,11 +255,23 @@ __decorate([
 ], UserResolver.prototype, "login", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
+    (0, type_graphql_1.UseMiddleware)(isAuth_1.isAuth),
     __param(0, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "logout", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => UserResponse),
+    (0, type_graphql_1.UseMiddleware)(isAuth_1.isAuth),
+    __param(0, (0, type_graphql_1.Arg)('username', { nullable: true })),
+    __param(1, (0, type_graphql_1.Arg)('email', { nullable: true })),
+    __param(2, (0, type_graphql_1.Arg)('file', () => graphql_upload_1.GraphQLUpload, { nullable: true })),
+    __param(3, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object, Object]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "updateUser", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => Boolean),
     __param(0, (0, type_graphql_1.Arg)('email')),
@@ -207,5 +289,8 @@ __decorate([
     __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "changePassword", null);
+UserResolver = __decorate([
+    (0, type_graphql_1.Resolver)(User_1.User)
+], UserResolver);
 exports.UserResolver = UserResolver;
 //# sourceMappingURL=UserResolver.js.map
