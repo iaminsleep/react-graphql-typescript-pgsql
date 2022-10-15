@@ -1,5 +1,15 @@
-mutation UpdateUser($username: String, $email: String, $file: Upload) {
-    updateUser(username: $username, email: $email, file: $file) {
+mutation UpdateUser(
+    $username: String
+    $email: String
+    $password: String!
+    $file: Upload
+) {
+    updateUser(
+        username: $username
+        email: $email
+        password: $password
+        file: $file
+    ) {
         ...RegularUserResponse
     }
 }

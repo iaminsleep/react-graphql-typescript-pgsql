@@ -3,7 +3,7 @@ import { MyContext } from "src/types";
 import { Arg, Ctx, Field, FieldResolver, Int, Mutation, ObjectType, Query, Resolver, Root, UseMiddleware } from "type-graphql";
 import argon2 from "argon2";
 import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from "../constants";
-import { UsernamePasswordInput } from "../utils/UsernamePasswordInput";
+import { EmailPasswordInput } from "../utils/EmailPasswordInput";
 import { validateRegister } from "../utils/validateRegister";
 import { sendEmail } from "../utils/sendEmail";
 import { v4 } from 'uuid';
@@ -77,7 +77,7 @@ export class UserResolver {
 
     @Mutation(() => UserResponse)
     async register(
-        @Arg('options', () => UsernamePasswordInput) options: UsernamePasswordInput, // use the options object, also you can specify what exactly you pass if you receieve an error
+        @Arg('options', () => EmailPasswordInput) options: EmailPasswordInput, // use the options object, also you can specify what exactly you pass if you receieve an error
     ): Promise<UserResponse> {
         const errors = validateRegister(options);
         if(errors) {
@@ -91,11 +91,11 @@ export class UserResolver {
                 email: options.email,
                 login: options.login.toLowerCase(),
                 password: hashedPassword
-            }).returning('*').execute(); // returning * clause to return user object
+            }).returning('*').execute(); // * clause to return user object
             user = result.raw[0]; // the whole code here is if you want to use query builder instead of easy User.create({email: options.email,username: options.username,password: hashedPassword}) function
 
         } catch (err) {
-            // duplicate username error
+            // duplicate login or email error
             if(err.code === '23505') return  {
                 errors: [{ 
                     field: 'login', 
@@ -166,16 +166,43 @@ export class UserResolver {
     async updateUser(
         @Arg('username', { nullable: true }) username: string,
         @Arg('email', { nullable: true }) email: string,
+        @Arg('password') password: string,
         @Arg('file', () => GraphQLUpload, { nullable: true }) file: FileUpload,
         @Ctx() { req }: MyContext,
     ): Promise<UserResponse> {
-        const user = await User.findOne({ where: { id: req.session.userId } });
-        if(!user) return {
+        const oldUser = await User.findOne({ where: { id: req.session.userId } });
+
+        // user found confirmation
+        if(!oldUser) return {
             errors: [{
-                field: 'login',
+                field: 'username',
                 message: "User not found.",
             }]
         };
+        // password match confirmation
+        const valid = await argon2.verify(oldUser.password, password); // verify hashed user password with plain text password from graphql argument
+        if(!valid) return {
+            errors: [{
+                field: 'password',
+                message: "Incorrect password.",
+            }]
+        }
+        // email field validation
+        if(!email.includes('@')) { 
+                return { errors: [{ 
+                    field: 'email', 
+                    message: 'Invalid email'
+                }] 
+            };
+        }
+        // password field validation
+        if(password.length <= 4) { 
+            return { errors: [{ 
+                    field: 'password', 
+                    message: 'Password length must be greater than 4.'
+                }] 
+            };
+        }
 
         let newFilename = null;
             
@@ -186,36 +213,48 @@ export class UserResolver {
             newFilename = generateRandomString(12) + ext;
             const stream = createReadStream();
 
-            const pathName = path.join(__dirname, `../../../client/public/img/post/${newFilename}`);
+            const pathName = path.join(__dirname, `../../../client/public/img/avatar/${newFilename}`);
 
             const out = require('fs').createWriteStream(pathName);
             stream.pipe(out);
             await finished(out);
 
-            if(user.avatar) {
-                const pathName = path.join(__dirname, `../../../client/public/img/post/${user.avatar}`);
+            if(oldUser.avatar) {
+                const pathName = path.join(__dirname, `../../../client/public/img/avatar/${oldUser.avatar}`);
                 fs.unlinkSync(pathName);
             }
-        } else if (file === null && typeof file !== 'undefined' && user.avatar) {
-            const pathName = path.join(__dirname, `../../../client/public/img/post/${user.avatar}`);
+        } else if (file === null && typeof file !== 'undefined' && oldUser.avatar) {
+            const pathName = path.join(__dirname, `../../../client/public/img/avatar/${oldUser.avatar}`);
             fs.unlinkSync(pathName);
         }
 
-        const queryResult = await AppDataSource
-            .createQueryBuilder()
-            .update(User)
-            .set({  username, email,
-                    avatar: ( 
-                        file === null ? null :
-                        newFilename !== null ? newFilename : 
-                        file === undefined && newFilename === null ? user.avatar : null
-                    )})
-            .where('id = :id', { 
-                id: req.session.userId 
-            })
-            .returning("*") // return post after query exec
-            .execute();
-        return queryResult.raw[0] as UserResponse;
+        let user;
+        try { 
+            const queryResult = await AppDataSource
+                .createQueryBuilder()
+                .update(User)
+                .set({  username, email,
+                        avatar: ( 
+                            file === null ? null :
+                            newFilename !== null ? newFilename : 
+                            file === undefined && newFilename === null ? oldUser.avatar : null
+                        )})
+                .where('id = :id', { 
+                    id: req.session.userId 
+                })
+                .returning("*")
+                .execute();
+            user = queryResult.raw[0];
+        } catch (err) {
+            if(err.code === '23505') return { // duplicate email error
+                errors: [{ 
+                    field: 'email', 
+                    message: 'This email already exists in the database.'
+                }]
+            }
+        }
+
+        return { user }; // return user in the object
     }
 
     @Mutation(() => Boolean)

@@ -1,6 +1,6 @@
-import { UsernamePasswordInput } from "./UsernamePasswordInput"
+import { EmailPasswordInput } from "./EmailPasswordInput"
 
-export const validateRegister = (options: UsernamePasswordInput) => {
+export const validateRegister = (options: EmailPasswordInput) => {
     // email field validation
     if(!options.email.includes('@')) { 
         return [{ 
@@ -12,7 +12,7 @@ export const validateRegister = (options: UsernamePasswordInput) => {
     // username field validation
     if(options.login.length <= 2) { 
         return [{ 
-            field: 'username', 
+            field: 'login', 
             message: 'Username length must be greater than 2.'
         }];
     }
@@ -20,7 +20,7 @@ export const validateRegister = (options: UsernamePasswordInput) => {
     // username not containing @ validation
     if(options.login.includes('@')) { 
         return [{ 
-            field: 'username', 
+            field: 'login', 
             message: 'Prohibited symbol'
         }];
     }

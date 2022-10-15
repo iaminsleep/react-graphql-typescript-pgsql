@@ -32,7 +32,7 @@ export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
                                 <img
                                     className="avatar"
                                     src={ post.creator.avatar 
-                                        ? `${process.env.PUBLIC_URL}/img/${post.creator.avatar}`
+                                        ? `${process.env.PUBLIC_URL}/img/avatar/${post.creator.avatar}`
                                         : `${process.env.PUBLIC_URL}/img/no_avatar.png`
                                     }
                                     alt={`${post.creator.login}'s avatar`}
@@ -43,7 +43,7 @@ export const Tweet: React.FC<TweetProps> = ({ openModal, post }) => {
                                     <Link href={`/user/${post.creator.id}`}>
                                         <div className="tweet_div">
                                             <h3 className="tweet-author">
-                                                { post.creator.username ?? post.creator.login }
+                                                { (post.creator.username && post.creator.username !== "") ? post.creator.username : post.creator.login}
                                             </h3>
                                             <p className="tweet-author__add tweet-author__nickname">
                                                 @{ post.creator.login }

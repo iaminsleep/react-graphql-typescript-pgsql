@@ -29,4 +29,4 @@ EmailPasswordInput = __decorate([
     (0, type_graphql_1.InputType)()
 ], EmailPasswordInput);
 exports.EmailPasswordInput = EmailPasswordInput;
-//# sourceMappingURL=UsernamePasswordInput.js.map
+//# sourceMappingURL=EmailPasswordInput.js.map

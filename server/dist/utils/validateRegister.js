@@ -10,13 +10,13 @@ const validateRegister = (options) => {
     }
     if (options.login.length <= 2) {
         return [{
-                field: 'username',
+                field: 'login',
                 message: 'Username length must be greater than 2.'
             }];
     }
     if (options.login.includes('@')) {
         return [{
-                field: 'username',
+                field: 'login',
                 message: 'Prohibited symbol'
             }];
     }

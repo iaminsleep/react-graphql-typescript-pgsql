@@ -73,7 +73,7 @@ export const User = ({}) => {
                         <img
                             className="avatar avatar-profile"
                             src={ data.user.avatar 
-                                ? `${process.env.PUBLIC_URL}/img/${data.user.avatar}` 
+                                ? `${process.env.PUBLIC_URL}/img/avatar/${data.user.avatar}` 
                                 : `${process.env.PUBLIC_URL}/img/no_avatar.png`
                             }
                             alt={`${data.user.login}'s avatar`}
@@ -81,8 +81,8 @@ export const User = ({}) => {
                         { meData?.data?.me?.id === data.user.id
                             ?   <Button variant="secondary" onClick={() => router.push({ 
                                     pathname: '/settings', 
-                                    query: { userId: data?.user?.id}})}
-                                >
+                                    query: { userId: data?.user?.id} 
+                                })}>
                                     Edit profile
                                 </Button>
                             : null
@@ -90,7 +90,9 @@ export const User = ({}) => {
                     </div>
                     <div className="profile-lower">
                         <div className="lower-username">
-                            <h2 className="username">{data.user.username ?? data.user.login}</h2>
+                            <h2 className="username">
+                                { (data.user.username && data.user.username !== "") ? data.user.username : data.user.login }
+                            </h2>
                             <h3 className="login">@{data.user.login}</h3>
                         </div>
                         <div className="join-time">

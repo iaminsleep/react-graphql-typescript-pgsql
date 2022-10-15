@@ -1,6 +1,6 @@
 # We don't need to specify fields inside options, which is very convinient. All the options are stored inside UsernamePasswordInput which is stored in
 
-mutation Register($options: UsernamePasswordInput!) {
+mutation Register($options: EmailPasswordInput!) {
     register(options: $options) {
         ...RegularUserResponse
     }

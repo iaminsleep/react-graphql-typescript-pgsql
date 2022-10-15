@@ -164,7 +164,10 @@ export const EditPost = ({}) => {
                                     {   createObjectURL
                                         ?   <div className="alignCenter">
                                                 <button 
-                                                    onClick={() => setCreateObjectURL('')} 
+                                                    onClick={() => {
+                                                        setCreateObjectURL('');
+                                                        setFieldValue("file", null);
+                                                    }}
                                                     className="tweet__delete-button chest-icon"
                                                     title="Delete this photo"
                                                 />
