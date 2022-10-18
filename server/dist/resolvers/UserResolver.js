@@ -56,6 +56,15 @@ __decorate([
 UserResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], UserResponse);
+let ForgotPasswordResponse = class ForgotPasswordResponse {
+};
+__decorate([
+    (0, type_graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", Object)
+], ForgotPasswordResponse.prototype, "url", void 0);
+ForgotPasswordResponse = __decorate([
+    (0, type_graphql_1.ObjectType)()
+], ForgotPasswordResponse);
 function generateRandomString(length) {
     var result = '';
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -220,12 +229,12 @@ let UserResolver = class UserResolver {
     async forgotPassword(email, { redis }) {
         const user = await User_1.User.findOne({ where: { email: email } });
         if (!user) {
-            return true;
+            return { url: null };
         }
         const token = (0, uuid_1.v4)();
-        await redis.set(constants_1.FORGET_PASSWORD_PREFIX + token, user.id, 'EX', 1000 * 60 * 60 * 24 * 2);
-        await (0, sendEmail_1.sendEmail)(email, `<a href="${process.env.CORS_ORIGIN}/change-password/${token}">Click this link to reset your password</a>`);
-        return true;
+        await redis.set(constants_1.FORGET_PASSWORD_PREFIX + token, user.id, 'EX', 1000 * 60 * 60 * 24);
+        const emailUrl = await (0, sendEmail_1.sendEmail)(email, `<a href="${process.env.CORS_ORIGIN}/change-password/${token}">Click on this link to reset your password</a>`);
+        return { url: emailUrl };
     }
     async changePassword(token, newPassword, { req, redis }) {
         if (newPassword.length <= 4) {
@@ -309,7 +318,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "updateUser", null);
 __decorate([
-    (0, type_graphql_1.Mutation)(() => Boolean),
+    (0, type_graphql_1.Mutation)(() => ForgotPasswordResponse),
     __param(0, (0, type_graphql_1.Arg)('email')),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),

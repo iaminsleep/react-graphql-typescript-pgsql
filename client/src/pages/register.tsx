@@ -38,7 +38,7 @@ const Register: React.FC<RegisterProps> = ({}) => {
                 <h2 className="tweet-form__title">Welcome to Twitter</h2>
                 <div className="tweet-form__subtitle">
                     If you are already registered,&nbsp;
-                    <button className="white" onClick={() => {
+                    <button className="link-pswd" onClick={() => {
                         openModal();
                     }}>login</button>
                 </div>
@@ -63,20 +63,20 @@ const Register: React.FC<RegisterProps> = ({}) => {
                         <Form>
                             <InputField
                                 name="email"
-                                placeholder="email"
+                                placeholder="Email"
                                 className="tweet-form__input"
                             />
                             <Box mt={4}>
                             <InputField
                                 name="login"
-                                placeholder="login"
+                                placeholder="Login"
                                 className="tweet-form__input"
                             />
                             </Box>
                             <Box mt={4}>
                             <InputField
                                 name="password"
-                                placeholder="password"
+                                placeholder="Password"
                                 type="password"
                                 className="tweet-form__input"
                             />

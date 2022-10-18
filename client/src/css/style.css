@@ -554,7 +554,7 @@ button {
 .modal__body {
 	background-color: #ffffff;
 	border-radius: 25px;
-	margin-top: 5%;
+	margin-top: 10%;
 	/*max-width: 50vw;*/
 	max-height: 90vh;
 	/*min-width: 600px;*/
@@ -621,6 +621,21 @@ button {
 	padding-bottom: 300px;
 	justify-content: center;
 	display: flex;
+	color: rgb(91, 112, 131);
+}
+
+.padding-150 {
+	padding: 150px;
+}
+
+.link-pswd {
+	color: rgb(26, 145, 218) !important;
+}
+
+.forgot-password1 {
+	margin: 0 auto;
+		padding-left: 100px;
+		padding-bottom: 20px;
 }
 
 .width-fifty-px {

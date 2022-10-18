@@ -114,6 +114,9 @@ export const User = ({}) => {
             {/* if data is true, the posts are going to show. */}
             {!postData.data && postData.fetching ? (
                 <div>Loading...</div>
+            ): null}
+            {!postData.fetching && !postData.data?.posts.posts.length ? (
+                <div className="empty-posts">There are no posts yet.</div>
             ) : (
                 <ul className="tweet-list">
                 {postData.data?.posts.posts?.map((post) => // ! exclamation point tells us that data variable is definitely going to have data

@@ -20,13 +20,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ closeModal }) => {
                 <div className="modal-close">
                     <button className="modal-close__btn chest-icon" onClick={() => closeModal()}></button>
                 </div>
-                <section className="wrapper">
-                    <h2 className="tweet-form__title">Enter your username and password</h2>
+                <section>
+                    <h2 className="tweet-form__title">Enter your login and password</h2>
                     <div className="tweet-form__subtitle">
-                        If you don't have a username,&nbsp;
+                        If you are new here,&nbsp;
                         <NextLink href="/register">
-                            register
-                        </NextLink>
+                            <a className="link-pswd">
+                                register
+                            </a>
+                        </NextLink>.
                     </div>
                     <Formik
                         initialValues={{ loginOrEmail: "", password: "" }}
@@ -52,7 +54,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ closeModal }) => {
                                     <InputField
                                         type="text"
                                         className="tweet-form__input"
-                                        placeholder="Login"
+                                        placeholder="Login (or email)"
                                         required
                                         name="loginOrEmail"
                                         autoComplete="off"
@@ -65,6 +67,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ closeModal }) => {
                                         name="password"
                                         autoComplete="off"
                                     />
+                                    <NextLink href="/forgot-password">
+                                        <a className="link-pswd forgot-password1">Forgot password?</a>
+                                    </NextLink>
                                 </div>
                                 <div className="tweet-form__btns_center">
                                     <Button

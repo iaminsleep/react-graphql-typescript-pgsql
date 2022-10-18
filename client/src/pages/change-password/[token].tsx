@@ -4,10 +4,12 @@ import { Box, Button } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import { NextPage } from "next";
 import { withUrqlClient } from "next-urql";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { AuthModal } from "../../components/AuthModal";
 import { InputField } from "../../components/InputField";
-import { Wrapper } from "../../components/Wrapper";
+import { Layout } from "../../components/Layout";
 import { useChangePasswordMutation } from '../../generated/graphql';
 import { createUrqlClient } from "../../utils/createUrqlClient";
 import { toErrorMap } from "../../utils/toErrorMap";
@@ -17,8 +19,19 @@ export const ChangePassword: NextPage<{token: string}> = () => {
     const [, changePassword] = useChangePasswordMutation();
     const [tokenError, setTokenError] = useState('');
     
+    const [isModalOpen, setModalOpen] = useState(false);
+    const openModal = () => {
+        setModalOpen(true);
+    }
+    const closeModal = () => {
+        setModalOpen(false);
+    }
+
     return (
-        <Wrapper variant="regular">
+        <Layout openModal={openModal}>
+            <Head>
+                <title>New Password</title>
+            </Head>
             <Formik
                 initialValues={{ newPassword: '' }}
                 onSubmit={async (values, { setErrors }) => {
@@ -37,35 +50,34 @@ export const ChangePassword: NextPage<{token: string}> = () => {
                 }}
             >
                 {({ isSubmitting }) => (
-                    <Form>
+                    <Form className="tweet-form padding-150">
                         <InputField
                             name="newPassword"
-                            placeholder="new password"
-                            label="New Password"
+                            className="tweet-form__input"
+                            placeholder="New Password"
                             type="password"
                         />
                         { tokenError 
                         ? <Box color='red'>{tokenError}</Box> 
                         : null }
-                        <Button
-                            mt={4}
-                            type="submit"
-                            isLoading={ isSubmitting }
-                            color="white"
-                            backgroundColor="teal"
-                        >Change Password
-                        </Button>
+                        <div className="tweet-form__btns_center">
+                            <Button
+                                mt={4}
+                                type="submit"
+                                isLoading={ isSubmitting }
+                                className="tweet-form__btn_center"
+                            >Change Password
+                            </Button>
+                        </div>
                     </Form>
                 )}
             </Formik>
-        </Wrapper>
+            { isModalOpen 
+                ? <AuthModal closeModal={closeModal}></AuthModal>
+                : ''
+            }
+        </Layout>
     );
 }
-
-// ChangePassword.getInitialProps = ({query}) => { // get any query parameters and pass to original function
-//     return {
-//         token: query.token as string // cast token as string
-//     } another way instead of using 'router.query.token'
-// }
 
 export default withUrqlClient(createUrqlClient)(ChangePassword);

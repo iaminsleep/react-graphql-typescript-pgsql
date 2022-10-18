@@ -31,6 +31,12 @@ class UserResponse {
     user?: User;
 }
 
+@ObjectType() // GraphQL object
+class ForgotPasswordResponse {
+    @Field(() => String, { nullable: true })
+    url?: String | null;
+}
+
 function generateRandomString(length: number) {
     var result = '';
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -257,28 +263,28 @@ export class UserResolver {
         return { user }; // return user in the object
     }
 
-    @Mutation(() => Boolean)
+    @Mutation(() => ForgotPasswordResponse)
     async forgotPassword(
         @Arg('email') email: string,
         @Ctx() { redis } : MyContext
-    ) {
+    ): Promise<ForgotPasswordResponse> {
         const user = await User.findOne(
             { where: { email: email } }
         ); // email is not primary key, that's why we need to specify it when searching
         if(!user) {
             // the email is not in the db
-            return true; // the reason for this is security, because realistically you don't want for user to fetch the entire database and let him know which email exists and which is not.
+            return { url: null }; // the reason for this is security, because realistically you don't want for user to fetch the entire database and let him know which email exists and which is not.
         }
 
         // generate token
         const token = v4(); // generate token using uuid lib
-        await redis.set(FORGET_PASSWORD_PREFIX + token, user.id, 'EX', 1000 * 60 * 60 * 24 * 2); // store the token inside redis database that will look like: 'forget-password:qeioe-rwetg423-dsd-dsf', expires after 2 days
+        await redis.set(FORGET_PASSWORD_PREFIX + token, user.id, 'EX', 1000 * 60 * 60 * 24); // store the token inside redis database that will look like: 'forget-password:qeioe-rwetg423-dsd-dsf', expires after 1 day
 
-        await sendEmail(email, 
-            `<a href="${process.env.CORS_ORIGIN}/change-password/${token}">Click this link to reset your password</a>`
-        );
+        const emailUrl = await sendEmail(email, 
+            `<a href="${process.env.CORS_ORIGIN}/change-password/${token}">Click on this link to reset your password</a>`
+        ) as string;
 
-        return true; // return true anyway
+        return { url: emailUrl }; // return true anyway
     }
 
     @Mutation(() => UserResponse)

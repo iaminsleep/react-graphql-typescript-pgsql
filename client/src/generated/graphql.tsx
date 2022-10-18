@@ -16,6 +16,12 @@ export type Scalars = {
   Upload: any;
 };
 
+export type EmailPasswordInput = {
+  email: Scalars['String'];
+  login: Scalars['String'];
+  password: Scalars['String'];
+};
+
 export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
@@ -27,12 +33,17 @@ export type FileResponse = {
   newFilename: Scalars['String'];
 };
 
+export type ForgotPasswordResponse = {
+  __typename?: 'ForgotPasswordResponse';
+  url?: Maybe<Scalars['String']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: UserResponse;
   createPost: Post;
   deletePost: Scalars['Boolean'];
-  forgotPassword: Scalars['Boolean'];
+  forgotPassword: ForgotPasswordResponse;
   like: Scalars['Boolean'];
   login: UserResponse;
   logout: Scalars['Boolean'];
@@ -77,7 +88,7 @@ export type MutationLoginArgs = {
 
 
 export type MutationRegisterArgs = {
-  options: UsernamePasswordInput;
+  options: EmailPasswordInput;
 };
 
 
@@ -164,12 +175,6 @@ export type UserResponse = {
   user?: Maybe<User>;
 };
 
-export type UsernamePasswordInput = {
-  email: Scalars['String'];
-  login: Scalars['String'];
-  password: Scalars['String'];
-};
-
 export type PostPreviewSnippetFragment = { __typename?: 'Post', id: number, textSnippet: string, postCreationDateString: string, likes_count: number, voteStatus?: number | null, image?: string | null, createdAt: string, updatedAt: string, creator: { __typename?: 'User', id: number, email: string, login: string, username?: string | null, avatar?: string | null, createdAt: string } };
 
 export type RegularErrorFragment = { __typename?: 'FieldError', field: string, message: string };
@@ -208,7 +213,7 @@ export type ForgotPasswordMutationVariables = Exact<{
 }>;
 
 
-export type ForgotPasswordMutation = { __typename?: 'Mutation', forgotPassword: boolean };
+export type ForgotPasswordMutation = { __typename?: 'Mutation', forgotPassword: { __typename?: 'ForgotPasswordResponse', url?: string | null } };
 
 export type LikeMutationVariables = Exact<{
   postId: Scalars['Int'];
@@ -231,7 +236,7 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 
 export type RegisterMutationVariables = Exact<{
-  options: UsernamePasswordInput;
+  options: EmailPasswordInput;
 }>;
 
 
@@ -380,7 +385,9 @@ export function useDeletePostMutation() {
 };
 export const ForgotPasswordDocument = gql`
     mutation ForgotPassword($email: String!) {
-  forgotPassword(email: $email)
+  forgotPassword(email: $email) {
+    url
+  }
 }
     `;
 
@@ -417,7 +424,7 @@ export function useLogoutMutation() {
   return Urql.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument);
 };
 export const RegisterDocument = gql`
-    mutation Register($options: UsernamePasswordInput!) {
+    mutation Register($options: EmailPasswordInput!) {
   register(options: $options) {
     ...RegularUserResponse
   }
