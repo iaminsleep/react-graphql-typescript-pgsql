@@ -1,5 +1,8 @@
 {
   "scripts": {
+    "install-main": "cd server && npm install",
+    "install-server": "cd server && npm install",
+    "install-client": "cd client && npm install",
     "client-dev": "cd client && yarn dev",
     "server-dev": "cd server && yarn dev",
     "server-watch": "cd server && yarn watch",
