@@ -87,6 +87,7 @@ export const EditPost = ({}) => {
             if(!file) return false;
 
             setCreateObjectURL(URL.createObjectURL(file));
+            console.log(file);
 
             return file;
         }
@@ -125,21 +126,27 @@ export const EditPost = ({}) => {
                                 />
                                 { data!.post!.image
                                     ?   <>
-                                            <a 
-                                                href={`${process.env.PUBLIC_URL}/img/post/${data!.post!.image}`} 
-                                                className="margin-left-twenty margin-top-twenty" 
-                                                target="_blank"
-                                            >
-                                                { showImage 
-                                                    ?   <Image 
+                                            { showImage 
+                                                ?   <a 
+                                                        href={`${process.env.PUBLIC_URL}/img/post/${data!.post!.image}`} 
+                                                        className="margin-left-twenty margin-top-twenty" 
+                                                        target="_blank"
+                                                    >
+                                                        <Image 
                                                             fallback={
                                                                 <img src={createObjectURL ? createObjectURL : `${process.env.PUBLIC_URL}/img/no_image.jpg`} alt="no_image"/>
                                                             } 
-                                                            src={`${createObjectURL ?? process.env.PUBLIC_URL}/img/post/${data!.post!.image}`}
+                                                            src={`${process.env.PUBLIC_URL}/img/post/${data!.post!.image}`}
                                                         />
-                                                    : null
-                                                }
-                                            </a>
+                                                    </a>
+                                                : createObjectURL
+                                                    ?   <>
+                                                            <a className="margin-left-twenty margin-top-twenty" href={createObjectURL} target="_blank">
+                                                                <img src={createObjectURL}/>
+                                                            </a>
+                                                        </>
+                                                    :   null
+                                            }
                                         </>
                                     :   
                                         createObjectURL
@@ -153,13 +160,14 @@ export const EditPost = ({}) => {
                                 }
                                 <div className="margin-left-twenty margin-top-twenty edit-post-btns">
                                     <button className="tweet-img__btn cursor-default" type="button">
-                                        <FileInput className="opacity-zero width-fifty-px" name="file" type="file" value={undefined} 
+                                        <FileInput className="opacity-zero width-fifty-px" name="file" type="file" value={undefined}
                                             onChange={
-                                                (e: any) => { 
+                                                (e: any) => {
                                                     createPreviewImage(e); 
                                                     setFieldValue("file", e!.target!.files![0]);
                                                 }
-                                        }/>
+                                            }
+                                        />
                                     </button>
                                     {   createObjectURL
                                         ?   <div className="alignCenter">
@@ -170,19 +178,21 @@ export const EditPost = ({}) => {
                                                     }}
                                                     className="tweet__delete-button chest-icon"
                                                     title="Delete this photo"
+                                                    type="button"
                                                 />
                                                 <p>Delete the photo</p>
                                             </div>
                                         : data!.post!.image
                                             ?   <div className="alignCenter">
                                                     <button 
-                                                        onClick={(e) => { 
-                                                            e.preventDefault(); 
+                                                        onClick={() => {  
+                                                            setCreateObjectURL('');
                                                             setFieldValue("file", null);
                                                             setShowImage(false);
                                                         }} 
                                                         className="tweet__delete-button chest-icon"
                                                         title="Delete this photo"
+                                                        type="button"
                                                     />
                                                     <p>Delete the photo</p>
                                                 </div>

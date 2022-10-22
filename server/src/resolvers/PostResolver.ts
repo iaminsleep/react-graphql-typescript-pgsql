@@ -205,11 +205,17 @@ export class PostResolver {
 
                 if(post.image) {
                     const pathName = path.join(__dirname, `../../../client/public/img/post/${post.image}`);
-                    fs.unlinkSync(pathName);
+                    if (fs.existsSync(pathName)) {
+                        // path exists
+                        fs.unlinkSync(pathName);
+                    }
                 }
             } else if (file === null && typeof file !== 'undefined' && post.image) {
                 const pathName = path.join(__dirname, `../../../client/public/img/post/${post.image}`);
-                fs.unlinkSync(pathName);
+                if (fs.existsSync(pathName)) {
+                    // path exists
+                    fs.unlinkSync(pathName);
+                }
             }
 
             const queryResult = await AppDataSource
@@ -243,7 +249,10 @@ export class PostResolver {
 
         if(post.image) {
             const pathName = path.join(__dirname, `../../../client/public/img/post/${post.image}`);
-            fs.unlinkSync(pathName);
+            if (fs.existsSync(pathName)) {
+                // path exists
+                fs.unlinkSync(pathName);
+            }
         }
         
         /** Without these codes you'll get a constraint error! */

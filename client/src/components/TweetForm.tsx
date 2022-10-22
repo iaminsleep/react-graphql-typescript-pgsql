@@ -49,8 +49,8 @@ export const TweetForm: React.FC<TweetFormProps> = ({ authUserData }) => {
                     <div className="tweet-form__wrapper">
                         <img
                             className="avatar"
-                            src={ authUserData?.me 
-                                ? `${process.env.PUBLIC_URL}/img/no_avatar.png`
+                            src={ authUserData?.me?.avatar
+                                ? `${process.env.PUBLIC_URL}/img/avatar/${authUserData?.me?.avatar}`
                                 : `${process.env.PUBLIC_URL}/img/no_avatar.png`
                             }
                             alt="Avatar"

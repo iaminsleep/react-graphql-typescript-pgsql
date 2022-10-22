@@ -1,10 +1,21 @@
 {
+  "scripts": {
+    "client-dev": "cd client && yarn dev",
+    "server-dev": "cd server && yarn dev",
+    "server-watch": "cd server && yarn watch",
+    "migrate": "cd server && yarn migration:run",
+    "dev": "concurrently --kill-others \"yarn client-dev\" \"yarn server-dev\" \"yarn server-watch\""
+  },
   "dependencies": {
     "@types/graphql-upload": "^8.0.11",
     "@urql/exchange-multipart-fetch": "^1.0.1",
+    "concurrently": "^7.4.0",
     "cookies-next": "^2.1.1",
     "dotenv-safe": "^8.2.0",
-    "graphql-upload": "13.0.0"
+    "graphql-upload": "13.0.0",
+    "parallelshell": "^3.0.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
 }

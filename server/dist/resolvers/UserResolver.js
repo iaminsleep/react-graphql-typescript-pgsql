@@ -192,12 +192,16 @@ let UserResolver = class UserResolver {
             await (0, promises_1.finished)(out);
             if (oldUser.avatar) {
                 const pathName = path_1.default.join(__dirname, `../../../client/public/img/avatar/${oldUser.avatar}`);
-                fs_1.default.unlinkSync(pathName);
+                if (fs_1.default.existsSync(pathName)) {
+                    fs_1.default.unlinkSync(pathName);
+                }
             }
         }
         else if (file === null && typeof file !== 'undefined' && oldUser.avatar) {
             const pathName = path_1.default.join(__dirname, `../../../client/public/img/avatar/${oldUser.avatar}`);
-            fs_1.default.unlinkSync(pathName);
+            if (fs_1.default.existsSync(pathName)) {
+                fs_1.default.unlinkSync(pathName);
+            }
         }
         let user;
         try {

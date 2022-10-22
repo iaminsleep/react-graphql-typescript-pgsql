@@ -227,11 +227,17 @@ export class UserResolver {
 
             if(oldUser.avatar) {
                 const pathName = path.join(__dirname, `../../../client/public/img/avatar/${oldUser.avatar}`);
-                fs.unlinkSync(pathName);
+                if (fs.existsSync(pathName)) {
+                    // path exists
+                    fs.unlinkSync(pathName);
+                }
             }
         } else if (file === null && typeof file !== 'undefined' && oldUser.avatar) {
             const pathName = path.join(__dirname, `../../../client/public/img/avatar/${oldUser.avatar}`);
-            fs.unlinkSync(pathName);
+            if (fs.existsSync(pathName)) {
+                // path exists
+                fs.unlinkSync(pathName);
+            }
         }
 
         let user;

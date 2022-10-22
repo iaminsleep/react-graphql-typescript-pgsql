@@ -154,12 +154,16 @@ let PostResolver = class PostResolver {
                 await (0, promises_1.finished)(out);
                 if (post.image) {
                     const pathName = path_1.default.join(__dirname, `../../../client/public/img/post/${post.image}`);
-                    fs_1.default.unlinkSync(pathName);
+                    if (fs_1.default.existsSync(pathName)) {
+                        fs_1.default.unlinkSync(pathName);
+                    }
                 }
             }
             else if (file === null && typeof file !== 'undefined' && post.image) {
                 const pathName = path_1.default.join(__dirname, `../../../client/public/img/post/${post.image}`);
-                fs_1.default.unlinkSync(pathName);
+                if (fs_1.default.existsSync(pathName)) {
+                    fs_1.default.unlinkSync(pathName);
+                }
             }
             const queryResult = await typeorm_data_source_1.AppDataSource
                 .createQueryBuilder()
@@ -182,7 +186,9 @@ let PostResolver = class PostResolver {
             return false;
         if (post.image) {
             const pathName = path_1.default.join(__dirname, `../../../client/public/img/post/${post.image}`);
-            fs_1.default.unlinkSync(pathName);
+            if (fs_1.default.existsSync(pathName)) {
+                fs_1.default.unlinkSync(pathName);
+            }
         }
         await Post_1.Post.delete({
             id,

@@ -14,6 +14,7 @@ const apollo_server_express_1 = require("apollo-server-express");
 const type_graphql_1 = require("type-graphql");
 const express_session_1 = __importDefault(require("express-session"));
 const ioredis_1 = __importDefault(require("ioredis"));
+const redis_memory_server_1 = require("redis-memory-server");
 const PostResolver_1 = require("./resolvers/PostResolver");
 const UserResolver_1 = require("./resolvers/UserResolver");
 const LikeResolver_1 = require("./resolvers/LikeResolver");
@@ -26,8 +27,15 @@ const main = async () => {
     var _a;
     const app = (0, express_1.default)();
     const port = constants_1.__port__ || 8080;
+    const redisServer = new redis_memory_server_1.RedisMemoryServer({
+        instance: {
+            port: 6379
+        }
+    });
+    const redisHost = await redisServer.getHost();
+    const redisPort = await redisServer.getPort();
     let RedisStore = require("connect-redis")(express_session_1.default);
-    let redis = new ioredis_1.default();
+    let redis = new ioredis_1.default({ host: redisHost, port: redisPort });
     typeorm_data_source_1.AppDataSource.initialize()
         .then(async () => {
     })
@@ -43,7 +51,7 @@ const main = async () => {
         resave: false,
         cookie: {
             path: '/',
-            maxAge: 1000 * 60 * 60 * 24,
+            maxAge: 1000 * 60 * 60 * 24 * 2,
             httpOnly: true,
             secure: constants_1.__prod__,
             sameSite: 'lax',
